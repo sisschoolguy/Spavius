@@ -46,8 +46,13 @@ Welcome to Spavius, your friendly AI-powered study companion! Spavius helps you 
 
 
 #Credits
+
 **Head Delevoper** Mehdi Rahimli
+
 **Website Designer** Mehdi Rahimli 
+
 **Absolute website beast** Mehdi Rahimli
+
 **Gave Youtube API** Seonghyun Je
+
 **Did something ig** Luke Angeles
