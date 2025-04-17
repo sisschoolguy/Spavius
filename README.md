@@ -45,7 +45,7 @@ Welcome to Spavius, your friendly AI-powered study companion! Spavius helps you 
 
 
 
-#Credits
+# Credits
 
 **Head Delevoper** Mehdi Rahimli
 
