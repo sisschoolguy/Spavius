@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spavius - AI Study Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.worker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.0/mammoth.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+</head>
+<body class="dark-mode">
+    <!-- Welcome Modal -->
+    <div id="welcomeModal" class="welcome-modal">
+        <div class="welcome-content">
+            <div class="welcome-header">
+                <h2>Welcome to Spavius!</h2>
+                <p class="text-muted">Help us personalize your experience</p>
+            </div>
+            
+            <div class="welcome-body">
+                <div id="currentQuestionContainer">
+                    <!-- Current question will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="welcome-navigation">
+                <button id="welcomePrevBtn" class="btn btn-secondary" disabled>
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button id="welcomeNextBtn" class="btn">
+                    Next <i class="fas fa-arrow-right"></i>
+                </button>
+                <button id="skipAllBtn" class="btn btn-secondary">
+                    Skip All
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Content -->
+    <div class="container">
+        <div id="mainContent" class="hidden">
+            <div class="header-controls">
+                <div class="dark-mode-switch">
+                    <span>Dark Mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="darkModeToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="api-key-notice">
+                    <span>Feeling slow?</span>
+                    <button id="changeApiKey">Upload API key</button>
+                </div>
+            </div>
+
+            <header>
+                <h1>Spavius</h1>
+                <p>Your AI-powered study companion</p>
+            </header>
+
+            <!-- Upload Section -->
+            <div class="card">
+                <h2>
+                    Upload Study Material
+                    <button class="more-options-btn" id="moreOptionsBtn" title="More options">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div class="more-options-dropdown" id="moreOptionsDropdown">
+                        <button id="showMoreOptions">More Options</button>
+                    </div>
+                </h2>
+                
+                <!-- Main Upload Options -->
+                <div id="mainUploadOptions">
+                    <div class="upload-type-selector">
+                        <div class="upload-type-option">
+                            <input type="radio" id="uploadTypeDocument" name="uploadType" value="document" checked>
+                            <label for="uploadTypeDocument">
+                                <i class="fas fa-file-alt"></i>
+                                <div>Document</div>
+                            </label>
+                        </div>
+                        <div class="upload-type-option">
+                            <input type="radio" id="uploadTypeYoutube" name="uploadType" value="youtube">
+                            <label for="uploadTypeYoutube">
+                                <i class="fab fa-youtube"></i>
+                                <div>YouTube Video</div>
+                            </label>
+                        </div>
+                        <div class="upload-type-option">
+                            <input type="radio" id="uploadTypeWebsite" name="uploadType" value="website">
+                            <label for="uploadTypeWebsite">
+                                <i class="fas fa-globe"></i>
+                                <div>Website</div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="documentUploadSection">
+                        <div class="upload-option">
+                            <label>
+                                <i class="fas fa-file-alt"></i> Document (PDF, DOCX, TXT)
+                            </label>
+                            <input type="file" id="documentUpload" accept=".pdf,.docx,.txt" class="hidden">
+                            <button id="fileUploadBtn" class="btn btn-secondary mt-2">
+                                <i class="fas fa-upload"></i> Choose File
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="youtubeUploadSection" class="hidden">
+                        <div class="upload-option">
+                            <label>
+                                <i class="fab fa-youtube"></i> YouTube Video URL
+                            </label>
+                            <input type="text" id="youtubeUrl" placeholder="https://www.youtube.com/watch?v=..." class="mt-2">
+                        </div>
+                    </div>
+                    
+                    <div id="websiteUploadSection" class="hidden">
+                        <div class="upload-option">
+                            <label>
+                                <i class="fas fa-globe"></i> Website URL
+                            </label>
+                            <input type="text" id="websiteUrl" placeholder="https://example.com" class="mt-2">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- More Upload Options (hidden by default) -->
+                <div id="moreUploadOptions" class="hidden">
+                    <div class="upload-type-selector">
+                        <div class="upload-type-option">
+                            <input type="radio" id="uploadTypeImage" name="uploadType" value="image">
+                            <label for="uploadTypeImage">
+                                <i class="fas fa-image"></i>
+                                <div>Image (OCR)</div>
+                            </label>
+                        </div>
+                        <div class="upload-type-option">
+                            <input type="radio" id="uploadTypeAudio" name="uploadType" value="audio">
+                            <label for="uploadTypeAudio">
+                                <i class="fas fa-microphone"></i>
+                                <div>Audio File</div>
+                            </label>
+                        </div>
+                        <div class="upload-type-option">
+                            <input type="radio" id="uploadTypeText" name="uploadType" value="text">
+                            <label for="uploadTypeText">
+                                <i class="fas fa-font"></i>
+                                <div>Direct Text</div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="imageUploadSection" class="hidden">
+                        <div class="upload-option">
+                            <label>
+                                <i class="fas fa-image"></i> Image (JPG, PNG)
+                            </label>
+                            <input type="file" id="imageUpload" accept=".jpg,.jpeg,.png" class="hidden">
+                            <button id="imageUploadBtn" class="btn btn-secondary mt-2">
+                                <i class="fas fa-upload"></i> Choose Image
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="audioUploadSection" class="hidden">
+                        <div class="upload-option">
+                            <label>
+                                <i class="fas fa-microphone"></i> Audio (WAV, MP3)
+                            </label>
+                            <input type="file" id="audioUpload" accept=".wav,.mp3" class="hidden">
+                            <button id="audioUploadBtn" class="btn btn-secondary mt-2">
+                                <i class="fas fa-upload"></i> Choose Audio
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="textUploadSection" class="hidden">
+                        <div class="upload-option">
+                            <label>
+                                <i class="fas fa-font"></i> Enter Text
+                            </label>
+                            <textarea id="directTextInput" rows="6" class="mt-2" placeholder="Paste your text here..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <button id="backToMainOptions" class="btn btn-secondary mt-3">
+                        <i class="fas fa-arrow-left"></i> Back to Main Options
+                    </button>
+                </div>
+                
+                <button id="processBtn" class="btn mt-3">
+                    <i class="fas fa-cogs"></i> Process Content
+                </button>
+            </div>
+
+            <!-- Processing Section -->
+            <div id="processingSection" class="card hidden">
+                <h2 id="processingTitle">Processing Your Content</h2>
+                <div class="loader-container">
+                    <div class="pulse-loader"></div>
+                    <p id="processingStatus">Starting analysis...</p>
+                    <div class="progress-container">
+                        <div id="progressBar" class="progress-bar"></div>
+                    </div>
+                </div>
+                <div id="errorContainer"></div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div id="actionSection" class="card hidden">
+                <h2>What would you like to do?</h2>
+                <div class="upload-options">
+                    <button id="generateNotes" class="btn">
+                        <i class="fas fa-book"></i> Generate Notes
+                    </button>
+                    <button id="generateQuiz" class="btn">
+                        <i class="fas fa-question-circle"></i> Generate Quiz (7 Questions)
+                    </button>
+                    <button id="chatAboutContent" class="btn">
+                        <i class="fas fa-comments"></i> Chat About Content
+                    </button>
+                </div>
+            </div>
+
+            <!-- Notes Output -->
+            <div id="notesSection" class="card hidden">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>Generated Notes</h2>
+                    <button id="copyNotes" class="btn btn-secondary" style="width: auto; padding: 8px 12px;">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+                <div id="notesOutput" class="output-content mt-3"></div>
+            </div>
+
+            <!-- Quiz Output -->
+            <div id="quizSection" class="card hidden">
+                <h2>Quiz</h2>
+                <div class="question-loading-bar hidden" id="questionLoadingBar">
+                    <div class="question-loading-progress" id="questionLoadingProgress"></div>
+                </div>
+                <div id="quizProgress" class="quiz-progress">Question 1 of 7</div>
+                <div id="currentQuestion" class="quiz-question">
+                    <!-- Question will be inserted here -->
+                </div>
+                <div class="quiz-navigation">
+                    <button id="quizPrevBtn" class="btn btn-secondary" disabled>
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button id="quizNextBtn" class="btn">
+                        Next <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button id="submitQuiz" class="btn hidden">
+                        Submit Quiz
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quiz Results -->
+            <div id="quizResults" class="card hidden">
+                <h2>Quiz Results</h2>
+                <div id="quizScore" class="mb-3" style="font-size: 1.2rem; font-weight: 500;"></div>
+                <div id="allQuestionsResults" class="quiz-container">
+                    <!-- All questions with answers will be inserted here -->
+                </div>
+                <button id="retakeQuiz" class="btn mt-3">
+                    <i class="fas fa-redo"></i> Retake Quiz
+                </button>
+            </div>
+
+            <!-- Chat Section -->
+            <div id="chatSection" class="card hidden">
+                <h2>Chat About Content</h2>
+                <div id="chatHistory" class="chat-history"></div>
+                <div class="chat-input-container">
+                    <input type="text" id="chatMessage" placeholder="Ask something about the content...">
+                    <button id="sendChat" class="btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Key Modal (hidden by default) -->
+    <div id="apiKeyModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close" id="closeApiKeyModal">&times;</button>
+            <div class="modal-header">
+                <h2>Change API Key</h2>
+                <p class="text-muted">Enter your API key to continue</p>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label for="apiKeyInput">Google Gemini API Key</label>
+                    <input type="password" id="apiKeyInput" placeholder="Paste your API key here">
+                </div>
+                <p class="text-muted mt-2">
+                    Get a free key from 
+                    <a href="https://aistudio.google.com/apikey" target="_blank" class="link">Google Ai Studios</a>.
+                </p>
+            </div>
+            <button id="submitApiKey" class="btn">Continue</button>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
