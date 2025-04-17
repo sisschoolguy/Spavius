@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -921,6 +920,181 @@
             box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.2);
         }
 
+        /* URL input styles */
+        input[type="text"], input[type="url"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: white;
+            color: var(--dark);
+        }
+
+        body.dark-mode input[type="text"], 
+        body.dark-mode input[type="url"] {
+            background-color: #333;
+            color: var(--dm-text);
+            border-color: var(--dm-border);
+        }
+
+        input[type="text"]:focus,
+        input[type="url"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        body.dark-mode input[type="text"]:focus,
+        body.dark-mode input[type="url"]:focus {
+            border-color: var(--dm-primary);
+            box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.2);
+        }
+
+        /* Welcome Modal */
+        .welcome-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .welcome-content {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.3s ease-out;
+            position: relative;
+        }
+
+        body.dark-mode .welcome-content {
+            background: var(--dm-card);
+            color: var(--dm-text);
+            box-shadow: var(--dm-shadow);
+        }
+
+        .welcome-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .welcome-header h2 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        body.dark-mode .welcome-header h2 {
+            color: var(--dm-primary);
+        }
+
+        .welcome-body {
+            margin-bottom: 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .welcome-question {
+            margin-bottom: 1.5rem;
+        }
+
+        .welcome-question h3 {
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        body.dark-mode .welcome-question h3 {
+            color: var(--dm-primary);
+        }
+
+        .welcome-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-option {
+            width: 100%;
+        }
+
+        .welcome-option input[type="radio"] {
+            display: none;
+        }
+
+        .welcome-option label {
+            display: block;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        body.dark-mode .welcome-option label {
+            border-color: var(--dm-border);
+        }
+
+        .welcome-option input[type="radio"]:checked + label {
+            border-color: var(--primary);
+            background-color: #f0f4ff;
+        }
+
+        body.dark-mode .welcome-option input[type="radio"]:checked + label {
+            border-color: var(--dm-primary);
+            background-color: #2a2a2a;
+        }
+
+        .welcome-custom-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        body.dark-mode .welcome-custom-input {
+            background-color: #333;
+            color: var(--dm-text);
+            border-color: var(--dm-border);
+        }
+
+        .skip-question {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .skip-question button {
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        body.dark-mode .skip-question button {
+            color: #aaa;
+        }
+
+        .welcome-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .container {
@@ -945,6 +1119,11 @@
             .upload-type-selector {
                 flex-direction: column;
             }
+
+            .welcome-content {
+                width: 95%;
+                padding: 1.5rem;
+            }
         }
 
         /* Utility Classes */
@@ -961,9 +1140,37 @@
     </style>
 </head>
 <body>
+    <!-- Welcome Modal -->
+    <div id="welcomeModal" class="welcome-modal">
+        <div class="welcome-content">
+            <div class="welcome-header">
+                <h2>Welcome to Spavius!</h2>
+                <p class="text-muted">Help us personalize your experience</p>
+            </div>
+            
+            <div class="welcome-body">
+                <div id="currentQuestionContainer">
+                    <!-- Current question will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="welcome-navigation">
+                <button id="welcomePrevBtn" class="btn btn-secondary" disabled>
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button id="welcomeNextBtn" class="btn">
+                    Next <i class="fas fa-arrow-right"></i>
+                </button>
+                <button id="skipAllBtn" class="btn btn-secondary">
+                    Skip All
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Main App Content -->
     <div class="container">
-        <div id="mainContent">
+        <div id="mainContent" class="hidden">
             <div class="header-controls">
                 <div class="dark-mode-switch">
                     <span>Dark Mode</span>
@@ -1012,6 +1219,13 @@
                                 <div>YouTube Video</div>
                             </label>
                         </div>
+                        <div class="upload-type-option">
+                            <input type="radio" id="uploadTypeWebsite" name="uploadType" value="website">
+                            <label for="uploadTypeWebsite">
+                                <i class="fas fa-globe"></i>
+                                <div>Website</div>
+                            </label>
+                        </div>
                     </div>
                     
                     <div id="documentUploadSection">
@@ -1032,6 +1246,15 @@
                                 <i class="fab fa-youtube"></i> YouTube Video URL
                             </label>
                             <input type="text" id="youtubeUrl" placeholder="https://www.youtube.com/watch?v=..." class="mt-2">
+                        </div>
+                    </div>
+                    
+                    <div id="websiteUploadSection" class="hidden">
+                        <div class="upload-option">
+                            <label>
+                                <i class="fas fa-globe"></i> Website URL
+                            </label>
+                            <input type="text" id="websiteUrl" placeholder="https://example.com" class="mt-2">
                         </div>
                     </div>
                 </div>
@@ -1156,10 +1379,10 @@
                     <!-- Question will be inserted here -->
                 </div>
                 <div class="quiz-navigation">
-                    <button id="prevQuestion" class="btn btn-secondary" disabled>
+                    <button id="quizPrevBtn" class="btn btn-secondary" disabled>
                         <i class="fas fa-arrow-left"></i> Previous
                     </button>
-                    <button id="nextQuestion" class="btn">
+                    <button id="quizNextBtn" class="btn">
                         Next <i class="fas fa-arrow-right"></i>
                     </button>
                     <button id="submitQuiz" class="btn hidden">
@@ -1204,12 +1427,12 @@
             </div>
             <div class="modal-body">
                 <div class="input-group">
-                    <label for="apiKeyInput">Gemini 2.0 Flash API Key</label>
+                    <label for="apiKeyInput">Google Gemini API Key</label>
                     <input type="password" id="apiKeyInput" placeholder="Paste your API key here">
                 </div>
                 <p class="text-muted mt-2">
                     Get a free key from 
-                    <a href="https://openrouter.ai/google/gemini-2.0-flash-001" target="_blank" class="link">OpenRouter</a>.
+                    <a href="https://openrouter.ai/google/gemini-flash-1.5:experimental/api" target="_blank" class="link">OpenRouter</a>.
                 </p>
             </div>
             <button id="submitApiKey" class="btn">Continue</button>
@@ -1218,7 +1441,7 @@
 
     <script>
         // Global variables
-        let apiKey = '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';
+        let apiKey = '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';
         const YOUTUBE_API_KEY = 'AIzaSyBf7T7Z6v2qjYHMqm5Db6yK0hhmx6Nnh8k';
         let processedContent = '';
         let chatHistory = [];
@@ -1226,8 +1449,66 @@
         let currentQuestionIndex = 0;
         let userAnswers = [];
         let quizSubmitted = false;
+        let userContext = {
+            curriculum: '',
+            grade: '',
+            subject: ''
+        };
+
+        // Questions for welcome modal
+        const welcomeQuestions = [
+            {
+                id: 'curriculum',
+                question: '1. What curriculum are you using?',
+                options: [
+                    'CAIE Cambridge IGCSE',
+                    'IB',
+                    { value: 'other', label: 'Other', showInput: true }
+                ]
+            },
+            {
+                id: 'grade',
+                question: '2. What grade are you in?',
+                options: [
+                    'Secondary 1 (Grade 7)',
+                    'Secondary 2 (Grade 8)',
+                    'Secondary 3 (Grade 9)',
+                    'Secondary 4 (Grade 10)',
+                    'JC 1 (Grade 11)',
+                    'JC 2 (Grade 12)',
+                    { value: 'other', label: 'Other', showInput: true }
+                ]
+            },
+            {
+                id: 'subject',
+                question: '3. What subject are you studying for?',
+                options: [
+                    'Mathematics',
+                    'English/Literature',
+                    'Physics',
+                    'Biology',
+                    'Chemistry',
+                    'Computer Sciences',
+                    'Economics',
+                    'Business',
+                    'Global Perspectives',
+                    'Religious Studies',
+                    'History',
+                    'Geography',
+                    'Sociology',
+                    { value: 'other', label: 'Other', showInput: true }
+                ],
+                dynamicOptions: true
+            }
+        ];
 
         // DOM elements
+        const welcomeModal = document.getElementById('welcomeModal');
+        const welcomeNextBtn = document.getElementById('welcomeNextBtn');
+        const welcomePrevBtn = document.getElementById('welcomePrevBtn');
+        const skipAllBtn = document.getElementById('skipAllBtn');
+        const currentQuestionContainer = document.getElementById('currentQuestionContainer');
+        
         const apiKeyModal = document.getElementById('apiKeyModal');
         const apiKeyInput = document.getElementById('apiKeyInput');
         const submitApiKey = document.getElementById('submitApiKey');
@@ -1256,8 +1537,8 @@
         const questionLoadingProgress = document.getElementById('questionLoadingProgress');
         const currentQuestionElement = document.getElementById('currentQuestion');
         const quizProgress = document.getElementById('quizProgress');
-        const prevQuestionBtn = document.getElementById('prevQuestion');
-        const nextQuestionBtn = document.getElementById('nextQuestion');
+        const quizPrevBtn = document.getElementById('quizPrevBtn');
+        const quizNextBtn = document.getElementById('quizNextBtn');
         const submitQuizBtn = document.getElementById('submitQuiz');
         const quizResults = document.getElementById('quizResults');
         const quizScore = document.getElementById('quizScore');
@@ -1270,7 +1551,9 @@
         const uploadTypeRadios = document.querySelectorAll('input[name="uploadType"]');
         const documentUploadSection = document.getElementById('documentUploadSection');
         const youtubeUploadSection = document.getElementById('youtubeUploadSection');
+        const websiteUploadSection = document.getElementById('websiteUploadSection');
         const youtubeUrl = document.getElementById('youtubeUrl');
+        const websiteUrl = document.getElementById('websiteUrl');
         const imageUploadSection = document.getElementById('imageUploadSection');
         const audioUploadSection = document.getElementById('audioUploadSection');
         const textUploadSection = document.getElementById('textUploadSection');
@@ -1299,7 +1582,190 @@
         // Initialize the app
         function init() {
             checkDarkModePreference();
-            mainContent.classList.remove('hidden');
+            
+            // Show welcome modal first
+            welcomeModal.classList.remove('hidden');
+            
+            // Set up event listeners for welcome modal
+            setupWelcomeModal();
+        }
+
+        // Set up welcome modal interactions
+        function setupWelcomeModal() {
+            let currentQuestionIndex = 0;
+            
+            // Display the first question
+            displayWelcomeQuestion(currentQuestionIndex);
+            
+            // Next question button
+            welcomeNextBtn.addEventListener('click', function() {
+                // Save the current answer
+                saveCurrentAnswer(currentQuestionIndex);
+                
+                // Move to next question or finish
+                if (currentQuestionIndex < welcomeQuestions.length - 1) {
+                    currentQuestionIndex++;
+                    displayWelcomeQuestion(currentQuestionIndex);
+                    welcomePrevBtn.disabled = false;
+                    
+                    if (currentQuestionIndex === welcomeQuestions.length - 1) {
+                        this.textContent = 'Finish';
+                    }
+                } else {
+                    // All questions answered, close modal
+                    welcomeModal.classList.add('hidden');
+                    mainContent.classList.remove('hidden');
+                    
+                    // Add user context to AI prompts
+                    if (userContext.curriculum || userContext.grade || userContext.subject) {
+                        const contextParts = [];
+                        if (userContext.curriculum) contextParts.push(`Curriculum: ${userContext.curriculum}`);
+                        if (userContext.grade) contextParts.push(`Grade: ${userContext.grade}`);
+                        if (userContext.subject) contextParts.push(`Subject: ${userContext.subject}`);
+                        
+                        processedContent = `User Context: ${contextParts.join(', ')}\n\n${processedContent}`;
+                    }
+                }
+            });
+            
+            // Previous question button
+            welcomePrevBtn.addEventListener('click', function() {
+                if (currentQuestionIndex > 0) {
+                    currentQuestionIndex--;
+                    displayWelcomeQuestion(currentQuestionIndex);
+                    
+                    if (currentQuestionIndex === 0) {
+                        this.disabled = true;
+                    }
+                    
+                    welcomeNextBtn.textContent = 'Next';
+                }
+            });
+            
+            // Skip all button
+            skipAllBtn.addEventListener('click', function() {
+                welcomeModal.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+            });
+        }
+        
+        // Display a welcome question
+        function displayWelcomeQuestion(index) {
+            const question = welcomeQuestions[index];
+            let html = `
+                <div class="welcome-question" id="${question.id}Question">
+                    <h3>${question.question}</h3>
+                    <div class="welcome-options" id="${question.id}Options">
+            `;
+            
+            // Get options (handle dynamic options for subject based on grade)
+            let options = question.options;
+            if (question.dynamicOptions && userContext.grade) {
+                const isGrade7or8 = userContext.grade.includes('Grade 7') || userContext.grade.includes('Grade 8');
+                if (isGrade7or8) {
+                    options = [
+                        'Mathematics',
+                        'English',
+                        'Science',
+                        'Global Perspectives',
+                        'ICT',
+                        'Music',
+                        'History',
+                        'Geography',
+                        'Religious Studies',
+                        { value: 'other', label: 'Other', showInput: true }
+                    ];
+                }
+            }
+            
+            // Add options to HTML
+            options.forEach((option, i) => {
+                const optionValue = typeof option === 'object' ? option.value : option;
+                const optionLabel = typeof option === 'object' ? option.label : option;
+                const optionId = `${question.id}Option${i}`;
+                
+                html += `
+                    <div class="welcome-option">
+                        <input type="radio" id="${optionId}" name="${question.id}" value="${optionValue}">
+                        <label for="${optionId}">${optionLabel}</label>
+                    </div>
+                `;
+                
+                // Add custom input if this option has one
+                if (typeof option === 'object' && option.showInput) {
+                    html += `
+                        <input type="text" id="${question.id}Custom" class="welcome-custom-input" placeholder="Please specify">
+                    `;
+                }
+            });
+            
+            html += `</div></div>`;
+            currentQuestionContainer.innerHTML = html;
+            
+            // Set up event listeners for radio buttons
+            options.forEach((option, i) => {
+                const optionValue = typeof option === 'object' ? option.value : option;
+                const optionId = `${question.id}Option${i}`;
+                const radioBtn = document.getElementById(optionId);
+                
+                if (radioBtn) {
+                    // Check if this option was previously selected
+                    if (userContext[question.id] === optionValue || 
+                        (optionValue === 'other' && userContext[question.id] && !options.includes(userContext[question.id]))) {
+                        radioBtn.checked = true;
+                        
+                        // Show custom input if needed
+                        if (typeof option === 'object' && option.showInput) {
+                            document.getElementById(`${question.id}Custom`).style.display = 'block';
+                            if (userContext[question.id] && !options.includes(userContext[question.id])) {
+                                document.getElementById(`${question.id}Custom`).value = userContext[question.id];
+                            }
+                        }
+                    }
+                    
+                    radioBtn.addEventListener('change', function() {
+                        // Show/hide custom input
+                        if (typeof option === 'object' && option.showInput) {
+                            document.getElementById(`${question.id}Custom`).style.display = 
+                                this.checked ? 'block' : 'none';
+                        }
+                    });
+                }
+            });
+            
+            // Update navigation buttons
+            if (index === 0) {
+                welcomePrevBtn.disabled = true;
+            } else {
+                welcomePrevBtn.disabled = false;
+            }
+            
+            if (index === welcomeQuestions.length - 1) {
+                welcomeNextBtn.textContent = 'Finish';
+            } else {
+                welcomeNextBtn.textContent = 'Next';
+            }
+        }
+        
+        // Save the current answer
+        function saveCurrentAnswer(index) {
+            const question = welcomeQuestions[index];
+            const selectedOption = document.querySelector(`input[name="${question.id}"]:checked`);
+            
+            if (selectedOption) {
+                if (selectedOption.value === 'other') {
+                    const customValue = document.getElementById(`${question.id}Custom`).value.trim();
+                    if (customValue) {
+                        userContext[question.id] = customValue;
+                    } else {
+                        userContext[question.id] = '';
+                    }
+                } else {
+                    userContext[question.id] = selectedOption.value;
+                }
+            } else {
+                userContext[question.id] = '';
+            }
         }
 
         // Dark mode toggle
@@ -1355,6 +1821,7 @@
             // Reset all upload sections
             documentUploadSection.classList.add('hidden');
             youtubeUploadSection.classList.add('hidden');
+            websiteUploadSection.classList.add('hidden');
             imageUploadSection.classList.add('hidden');
             audioUploadSection.classList.add('hidden');
             textUploadSection.classList.add('hidden');
@@ -1372,6 +1839,7 @@
             // Reset all upload sections
             documentUploadSection.classList.add('hidden');
             youtubeUploadSection.classList.add('hidden');
+            websiteUploadSection.classList.add('hidden');
             imageUploadSection.classList.add('hidden');
             audioUploadSection.classList.add('hidden');
             textUploadSection.classList.add('hidden');
@@ -1385,11 +1853,19 @@
         document.getElementById('uploadTypeDocument').addEventListener('change', function() {
             documentUploadSection.classList.remove('hidden');
             youtubeUploadSection.classList.add('hidden');
+            websiteUploadSection.classList.add('hidden');
         });
 
         document.getElementById('uploadTypeYoutube').addEventListener('change', function() {
             documentUploadSection.classList.add('hidden');
             youtubeUploadSection.classList.remove('hidden');
+            websiteUploadSection.classList.add('hidden');
+        });
+
+        document.getElementById('uploadTypeWebsite').addEventListener('change', function() {
+            documentUploadSection.classList.add('hidden');
+            youtubeUploadSection.classList.add('hidden');
+            websiteUploadSection.classList.remove('hidden');
         });
 
         // Upload type selection (more options)
@@ -1472,6 +1948,11 @@
                     if (!file) throw new Error('Please select a file');
                     content = await processDocument(file);
                 }
+                else if (selectedUploadType === 'website') {
+                    const url = websiteUrl.value.trim();
+                    if (!url) throw new Error('Please enter a website URL');
+                    content = await processWebsite(url);
+                }
                 else if (selectedUploadType === 'image') {
                     const file = imageUpload.files[0];
                     if (!file) throw new Error('Please select an image');
@@ -1536,6 +2017,51 @@
             updateProgress(70, 'Using video metadata...');
             
             return `YouTube Video: ${snippet.title}\n\nDescription:\n${snippet.description || "No description available"}`;
+        }
+
+        // Process website content
+        async function processWebsite(url) {
+            updateProgress(10, 'Fetching website content...');
+            
+            try {
+                // Use a CORS proxy to fetch the website content
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+                const response = await fetch(proxyUrl);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch website content');
+                }
+                
+                const data = await response.json();
+                
+                if (!data.contents) {
+                    throw new Error('No content received from website');
+                }
+                
+                // Create a temporary DOM parser to extract text
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data.contents, 'text/html');
+                
+                // Remove scripts, styles, and other non-content elements
+                const elementsToRemove = doc.querySelectorAll('script, style, nav, footer, iframe, img');
+                elementsToRemove.forEach(el => el.remove());
+                
+                // Get the text content
+                let textContent = doc.body.textContent;
+                
+                // Clean up the text
+                textContent = textContent
+                    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+                    .replace(/\n+/g, '\n') // Replace multiple newlines with single newline
+                    .trim();
+                
+                updateProgress(80, 'Processing website content...');
+                
+                return `Website Content from ${url}:\n\n${textContent}`;
+            } catch (error) {
+                console.error('Website processing error:', error);
+                throw new Error(`Failed to process website: ${error.message}`);
+            }
         }
 
         // Extract YouTube ID from URL
@@ -1664,11 +2190,6 @@
         async function processAudio(file) {
             updateProgress(20, 'Processing audio...');
             throw new Error('Audio processing requires additional setup with Vosk.js');
-            
-            // In a real implementation, you would:
-            // 1. Load the Vosk model
-            // 2. Process the audio in chunks
-            // 3. Return the transcribed text
         }
 
         // Generate notes
@@ -1679,7 +2200,15 @@
 
             try {
                 const notes = await generateContentWithAI(
-                    `Please create comprehensive study notes from the following content. Organize them clearly with headings, bullet points, and key takeaways:\n\n${processedContent}`
+                    `Please create comprehensive study notes from the following content. 
+                    Organize them clearly with headings, bullet points, and key takeaways.
+                    Use markdown-style formatting with:
+                    - Headings (##, ###)
+                    - Bullet points (-)
+                    - Bold for key terms (**term**)
+                    - Clear section organization
+                    
+                    Content:\n\n${processedContent}`
                 );
                 notesOutput.innerHTML = formatNotes(notes);
             } catch (error) {
@@ -1723,19 +2252,18 @@
                 }
                 
                 const quizResponse = await generateContentWithAI(
-                    `Create a quiz with 7 questions based on the following content. For each question, provide:
-                    1. The question text
-                    2. Four options labeled A), B), C), D)
-                    3. The correct answer (marked with "(correct)")
-                    4. A brief explanation of why the answer is correct
+                    `Create a multiple-choice quiz with exactly 7 questions based on the following content. 
+                    For each question follow this format strictly:
                     
-                    Format like this for each question:
-                    Question 1: [question text]
-                    A) [option 1]
-                    B) [option 2]
-                    C) [option 3] (correct)
-                    D) [option 4]
-                    Explanation: [explanation text]
+                    [QUESTION_START]
+                    Question: [The question text]
+                    A) [Option A]
+                    B) [Option B]
+                    C) [Option C]
+                    D) [Option D]
+                    Correct Answer: [Letter of correct option]
+                    Explanation: [Brief explanation of why this is correct]
+                    [QUESTION_END]
                     
                     Content:\n\n${processedContent}`
                 );
@@ -1765,57 +2293,35 @@
         // Parse quiz questions from the AI response
         function parseQuizQuestions(quizText) {
             const questions = [];
-            const questionBlocks = quizText.split(/\n\s*\n/).filter(block => block.trim());
+            const questionBlocks = quizText.split(/\[QUESTION_START\]/).filter(block => block.trim());
             
             for (const block of questionBlocks) {
-                const lines = block.split('\n').filter(line => line.trim());
-                if (lines.length < 6) continue; // Skip incomplete questions
-                
-                const questionText = lines[0].replace(/^Question \d+: /, '');
-                const options = [];
-                let correctAnswer = '';
-                let explanation = '';
-                
-                for (let i = 1; i < 5; i++) {
-                    if (i >= lines.length) break;
-                    const optionText = lines[i].trim();
-                    const isCorrect = optionText.includes('(correct)');
-                    const cleanOption = optionText.replace('(correct)', '').trim();
+                try {
+                    const questionMatch = block.match(/Question:\s*(.+?)\n/);
+                    const optionsMatches = [
+                        block.match(/A\)\s*(.+?)\n/),
+                        block.match(/B\)\s*(.+?)\n/),
+                        block.match(/C\)\s*(.+?)\n/),
+                        block.match(/D\)\s*(.+?)\n/)
+                    ];
+                    const correctAnswerMatch = block.match(/Correct Answer:\s*([A-D])/i);
+                    const explanationMatch = block.match(/Explanation:\s*(.+?)(?:\n|$)/);
                     
-                    options.push({
-                        letter: optionText[0], // A, B, C, or D
-                        text: cleanOption.substring(3), // Remove the "X) " prefix
-                        isCorrect: isCorrect
-                    });
-                    
-                    if (isCorrect) {
-                        correctAnswer = optionText[0];
+                    if (questionMatch && optionsMatches.every(m => m) && correctAnswerMatch && explanationMatch) {
+                        const correctAnswer = correctAnswerMatch[1].toUpperCase();
+                        questions.push({
+                            text: questionMatch[1].trim(),
+                            options: optionsMatches.map((m, i) => ({
+                                letter: String.fromCharCode(65 + i), // A, B, C, D
+                                text: m[1].trim(),
+                                isCorrect: String.fromCharCode(65 + i) === correctAnswer
+                            })),
+                            correctAnswer: correctAnswer,
+                            explanation: explanationMatch[1].trim()
+                        });
                     }
-                }
-                
-                // Find explanation (might be on last line or multiple lines)
-                for (let i = 5; i < lines.length; i++) {
-                    if (lines[i].startsWith('Explanation:')) {
-                        explanation = lines[i].substring('Explanation:'.length).trim();
-                        // Check if explanation continues on next lines
-                        for (let j = i + 1; j < lines.length; j++) {
-                            if (lines[j].trim() && !lines[j].startsWith('Question')) {
-                                explanation += ' ' + lines[j].trim();
-                            } else {
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                }
-                
-                if (questionText && options.length === 4 && correctAnswer && explanation) {
-                    questions.push({
-                        text: questionText,
-                        options: options,
-                        correctAnswer: correctAnswer,
-                        explanation: explanation
-                    });
+                } catch (e) {
+                    console.error('Error parsing question block:', e);
                 }
             }
             
@@ -1864,13 +2370,13 @@
             });
             
             // Update navigation buttons
-            prevQuestionBtn.disabled = index === 0;
-            nextQuestionBtn.disabled = false;
-            nextQuestionBtn.classList.remove('hidden');
+            quizPrevBtn.disabled = index === 0;
+            quizNextBtn.disabled = false;
+            quizNextBtn.classList.remove('hidden');
             submitQuizBtn.classList.add('hidden');
             
             if (index === quizQuestions.length - 1) {
-                nextQuestionBtn.classList.add('hidden');
+                quizNextBtn.classList.add('hidden');
                 submitQuizBtn.classList.remove('hidden');
             }
         }
@@ -1881,7 +2387,7 @@
         }
 
         // Previous question button
-        prevQuestionBtn.addEventListener('click', function() {
+        quizPrevBtn.addEventListener('click', function() {
             if (currentQuestionIndex > 0) {
                 currentQuestionIndex--;
                 displayQuestion(currentQuestionIndex);
@@ -1890,7 +2396,7 @@
         });
 
         // Next question button
-        nextQuestionBtn.addEventListener('click', function() {
+        quizNextBtn.addEventListener('click', function() {
             if (currentQuestionIndex < quizQuestions.length - 1) {
                 currentQuestionIndex++;
                 displayQuestion(currentQuestionIndex);
@@ -1983,7 +2489,7 @@
             actionSection.classList.add('hidden');
             chatSection.classList.remove('hidden');
             chatHistory = [
-                { role: 'assistant', content: 'I have the content you uploaded. Ask me anything about it!' }
+                { role: 'assistant', content: 'I have analyzed the content you provided. Ask me anything about it!' }
             ];
             updateChatHistory();
         });
@@ -1998,9 +2504,22 @@
             updateChatHistory();
 
             try {
+                // Format the chat history for Gemini
+                const messages = [
+                    {
+                        role: 'system',
+                        content: `You are a helpful study assistant. Base your answers on this content:\n\n${processedContent}`
+                    },
+                    ...chatHistory.map(msg => ({
+                        role: msg.role === 'user' ? 'user' : 'assistant',
+                        content: msg.content
+                    }))
+                ];
+
                 const response = await generateContentWithAI(
-                    `Based on the following content:\n\n${processedContent}\n\nAnswer this question: ${message}`
+                    `Current conversation:\n\n${messages.map(m => `${m.role}: ${m.content}`).join('\n')}\n\nassistant:`
                 );
+                
                 chatHistory.push({ role: 'assistant', content: response });
                 updateChatHistory();
             } catch (error) {
@@ -2035,13 +2554,23 @@
             document.getElementById('processingStatus').textContent = message;
         }
 
-        // Call Gemini API
+        // Call Gemini API via OpenRouter
         async function generateContentWithAI(prompt) {
             try {
                 updateProgress(10, 'Connecting to AI...');
                 
                 if (!apiKey) {
                     throw new Error('API key not found. Please enter your key.');
+                }
+                
+                // Add user context to prompt if available
+                if (userContext.curriculum || userContext.grade || userContext.subject) {
+                    let contextString = '';
+                    if (userContext.curriculum) contextString += `Curriculum: ${userContext.curriculum}. `;
+                    if (userContext.grade) contextString += `Grade: ${userContext.grade}. `;
+                    if (userContext.subject) contextString += `Subject: ${userContext.subject}. `;
+                    
+                    prompt = `User context: ${contextString}\n\n${prompt}`;
                 }
                 
                 const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -2053,11 +2582,13 @@
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        "model": "google/gemini-2.0-flash-001",
+                        "model": "google/gemini-flash-1.5:experimental",
                         "messages": [{
                             "role": "user",
-                            "content": [{ "type": "text", "text": prompt }]
-                        }]
+                            "content": prompt
+                        }],
+                        "temperature": 0.7,
+                        "max_tokens": 2000
                     })
                 });
                 
