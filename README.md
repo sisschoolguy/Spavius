@@ -1,7 +1,6 @@
 # Spavius
 
-Welcome to Spavius, your friendly AI-powered study companion! Spavius helps you turn any study material—documents, videos, websites, images, or plain text—into organized notes, quizzes, and even a chat interface for asking questions.
-The website link - https://sisschoolguy.github.io/Spavius/study.html
+Welcome to Spavius, your friendly AI-powered study companion! Spavius helps you turn any study material—documents, videos, websites, images, or plain text—into organized notes, quizzes, and even a chat interface for asking questions. Visit the website [here](https://sisschoolguy.github.io/Spavius/study.html)
 
 # How to Use Spavius
 
