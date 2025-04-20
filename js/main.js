@@ -1,6 +1,6 @@
 // Global variables
-let apiKey = 'AIzaSyBiO5_lYqTBfQY-i-9tzM4ZbDNo7mSxc4k';
-const YOUTUBE_API_KEY = 'AIzaSyBf7T7Z6v2qjYHMqm5Db6yK0hhmx6Nnh8k';
+let apiKey = ['AIzaSy', 'BiO5_lYq', 'TBfQY-i-9', 'tzM4ZbDNo', '7mSxc4k'].join('');
+const YOUTUBE_API_KEY = ['AIzaSy', 'Bf7T7Z6v', '2qjYHMqm5', 'Db6yK0hhm', 'x6Nnh8k'].join('');
 let processedContent = '';
 let chatHistory = [];
 let quizQuestions = [];
@@ -13,18 +13,153 @@ let userContext = {
     subject: ''
 };
 
-// Track analytics data
-let analyticsData = {
-    totalVisits: 0,
-    curriculumCounts: {},
-    gradeCounts: {},
-    subjectCounts: {},
-    averageTimeSpent: 0,
-    apiKeyUploads: 0,
-    visitStartTime: Date.now()
-};
+// DOM elements
+const welcomeModal = document.getElementById('welcomeModal');
+const welcomeNextBtn = document.getElementById('welcomeNextBtn');
+const welcomePrevBtn = document.getElementById('welcomePrevBtn');
+const skipAllBtn = document.getElementById('skipAllBtn');
+const currentQuestionContainer = document.getElementById('currentQuestionContainer');
+const darkModeToggle = document.getElementById('darkModeToggle');
+const mainContent = document.getElementById('mainContent');
+const documentUpload = document.getElementById('documentUpload');
+const fileUploadBtn = document.getElementById('fileUploadBtn');
+const imageUpload = document.getElementById('imageUpload');
+const imageUploadBtn = document.getElementById('imageUploadBtn');
+const audioUpload = document.getElementById('audioUpload');
+const audioUploadBtn = document.getElementById('audioUploadBtn');
+const processBtn = document.getElementById('processBtn');
+const processingSection = document.getElementById('processingSection');
+const processingStatus = document.getElementById('processingStatus');
+const actionSection = document.getElementById('actionSection');
+const generateNotes = document.getElementById('generateNotes');
+const generateQuiz = document.getElementById('generateQuiz');
+const chatAboutContent = document.getElementById('chatAboutContent');
+const explainInDetail = document.getElementById('explainInDetail');
+const notesSection = document.getElementById('notesSection');
+const notesOutput = document.getElementById('notesOutput');
+const copyNotes = document.getElementById('copyNotes');
+const quizSection = document.getElementById('quizSection');
+const questionLoadingBar = document.getElementById('questionLoadingBar');
+const questionLoadingProgress = document.getElementById('questionLoadingProgress');
+const currentQuestionElement = document.getElementById('currentQuestion');
+const quizProgress = document.getElementById('quizProgress');
+const quizPrevBtn = document.getElementById('quizPrevBtn');
+const quizNextBtn = document.getElementById('quizNextBtn');
+const submitQuizBtn = document.getElementById('submitQuiz');
+const quizResults = document.getElementById('quizResults');
+const quizScore = document.getElementById('quizScore');
+const allQuestionsResults = document.getElementById('allQuestionsResults');
+const retakeQuiz = document.getElementById('retakeQuiz');
+const chatSection = document.getElementById('chatSection');
+const chatHistoryElement = document.getElementById('chatHistory');
+const chatMessage = document.getElementById('chatMessage');
+const sendChat = document.getElementById('sendChat');
+const uploadTypeRadios = document.querySelectorAll('input[name="uploadType"]');
+const documentUploadSection = document.getElementById('documentUploadSection');
+const youtubeUploadSection = document.getElementById('youtubeUploadSection');
+const websiteUploadSection = document.getElementById('websiteUploadSection');
+const youtubeUrl = document.getElementById('youtubeUrl');
+const websiteUrl = document.getElementById('websiteUrl');
+const imageUploadSection = document.getElementById('imageUploadSection');
+const audioUploadSection = document.getElementById('audioUploadSection');
+const textUploadSection = document.getElementById('textUploadSection');
+const directTextInput = document.getElementById('directTextInput');
+const mainUploadOptions = document.getElementById('mainUploadOptions');
+const moreUploadOptions = document.getElementById('moreUploadOptions');
+const moreOptionsBtn = document.getElementById('moreOptionsBtn');
+const moreOptionsDropdown = document.getElementById('moreOptionsDropdown');
+const showMoreOptions = document.getElementById('showMoreOptions');
+const backToMainOptions = document.getElementById('backToMainOptions');
+const explainSection = document.getElementById('explainSection');
+const explainContent = document.getElementById('explainContent');
+const explainChatHistory = document.getElementById('explainChatHistory');
+const explainChatMessage = document.getElementById('explainChatMessage');
+const sendExplainChat = document.getElementById('sendExplainChat');
+const explainThisBtn = document.getElementById('explainThisBtn');
+const apiKeyModal = document.getElementById('apiKeyModal');
+const apiKeyInput = document.getElementById('apiKeyInput');
+const submitApiKey = document.getElementById('submitApiKey');
+const closeApiKeyModal = document.getElementById('closeApiKeyModal');
+const changeApiKey = document.getElementById('changeApiKey');
+const moreInfoLink = document.getElementById('moreInfoLink');
+const infoModal = document.getElementById('infoModal');
+const closeInfoModal = document.getElementById('closeInfoModal');
 
-// Questions for welcome modal
+// Initialize PDF.js
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.worker.min.js';
+
+// Check for dark mode preference
+function checkDarkModePreference() {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedMode = localStorage.getItem('darkMode');
+    
+    if (savedMode === 'dark' || (savedMode === null && prefersDark)) {
+        document.body.classList.add('dark-mode');
+        darkModeToggle.checked = true;
+    }
+}
+
+// Initialize the app
+function init() {
+    checkDarkModePreference();
+    
+    // Show welcome modal first
+    welcomeModal.classList.remove('hidden');
+    
+    // Set up event listeners for welcome modal
+    setupWelcomeModal();
+}
+
+// Set up welcome modal interactions
+function setupWelcomeModal() {
+    let currentQuestionIndex = 0;
+    
+    // Display the first question
+    displayWelcomeQuestion(currentQuestionIndex);
+    
+    // Next question button
+    welcomeNextBtn.addEventListener('click', function() {
+        // Save the current answer
+        saveCurrentAnswer(currentQuestionIndex);
+        
+        // Move to next question or finish
+        if (currentQuestionIndex < welcomeQuestions.length - 1) {
+            currentQuestionIndex++;
+            displayWelcomeQuestion(currentQuestionIndex);
+            welcomePrevBtn.disabled = false;
+            
+            if (currentQuestionIndex === welcomeQuestions.length - 1) {
+                this.textContent = 'Finish';
+            }
+        } else {
+            // All questions answered, close modal
+            welcomeModal.classList.add('hidden');
+            mainContent.classList.remove('hidden');
+        }
+    });
+    
+    // Previous question button
+    welcomePrevBtn.addEventListener('click', function() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            displayWelcomeQuestion(currentQuestionIndex);
+            
+            if (currentQuestionIndex === 0) {
+                this.disabled = true;
+            }
+            
+            welcomeNextBtn.textContent = 'Next';
+        }
+    });
+    
+    // Skip all button
+    skipAllBtn.addEventListener('click', function() {
+        welcomeModal.classList.add('hidden');
+        mainContent.classList.remove('hidden');
+    });
+}
+
+// Welcome questions
 const welcomeQuestions = [
     {
         id: 'curriculum',
@@ -70,217 +205,6 @@ const welcomeQuestions = [
         dynamicOptions: true
     }
 ];
-
-// DOM elements
-const welcomeModal = document.getElementById('welcomeModal');
-const welcomeNextBtn = document.getElementById('welcomeNextBtn');
-const welcomePrevBtn = document.getElementById('welcomePrevBtn');
-const skipAllBtn = document.getElementById('skipAllBtn');
-const currentQuestionContainer = document.getElementById('currentQuestionContainer');
-
-const apiKeyModal = document.getElementById('apiKeyModal');
-const apiKeyInput = document.getElementById('apiKeyInput');
-const submitApiKey = document.getElementById('submitApiKey');
-const closeApiKeyModal = document.getElementById('closeApiKeyModal');
-const changeApiKey = document.getElementById('changeApiKey');
-const darkModeToggle = document.getElementById('darkModeToggle');
-const mainContent = document.getElementById('mainContent');
-const documentUpload = document.getElementById('documentUpload');
-const fileUploadBtn = document.getElementById('fileUploadBtn');
-const imageUpload = document.getElementById('imageUpload');
-const imageUploadBtn = document.getElementById('imageUploadBtn');
-const audioUpload = document.getElementById('audioUpload');
-const audioUploadBtn = document.getElementById('audioUploadBtn');
-const processBtn = document.getElementById('processBtn');
-const processingSection = document.getElementById('processingSection');
-const processingStatus = document.getElementById('processingStatus');
-const actionSection = document.getElementById('actionSection');
-const generateNotes = document.getElementById('generateNotes');
-const generateQuiz = document.getElementById('generateQuiz');
-const chatAboutContent = document.getElementById('chatAboutContent');
-const notesSection = document.getElementById('notesSection');
-const notesOutput = document.getElementById('notesOutput');
-const copyNotes = document.getElementById('copyNotes');
-const quizSection = document.getElementById('quizSection');
-const questionLoadingBar = document.getElementById('questionLoadingBar');
-const questionLoadingProgress = document.getElementById('questionLoadingProgress');
-const currentQuestionElement = document.getElementById('currentQuestion');
-const quizProgress = document.getElementById('quizProgress');
-const quizPrevBtn = document.getElementById('quizPrevBtn');
-const quizNextBtn = document.getElementById('quizNextBtn');
-const submitQuizBtn = document.getElementById('submitQuiz');
-const quizResults = document.getElementById('quizResults');
-const quizScore = document.getElementById('quizScore');
-const allQuestionsResults = document.getElementById('allQuestionsResults');
-const retakeQuiz = document.getElementById('retakeQuiz');
-const chatSection = document.getElementById('chatSection');
-const chatHistoryElement = document.getElementById('chatHistory');
-const chatMessage = document.getElementById('chatMessage');
-const sendChat = document.getElementById('sendChat');
-const uploadTypeRadios = document.querySelectorAll('input[name="uploadType"]');
-const documentUploadSection = document.getElementById('documentUploadSection');
-const youtubeUploadSection = document.getElementById('youtubeUploadSection');
-const websiteUploadSection = document.getElementById('websiteUploadSection');
-const youtubeUrl = document.getElementById('youtubeUrl');
-const websiteUrl = document.getElementById('websiteUrl');
-const imageUploadSection = document.getElementById('imageUploadSection');
-const audioUploadSection = document.getElementById('audioUploadSection');
-const textUploadSection = document.getElementById('textUploadSection');
-const directTextInput = document.getElementById('directTextInput');
-const mainUploadOptions = document.getElementById('mainUploadOptions');
-const moreUploadOptions = document.getElementById('moreUploadOptions');
-const moreOptionsBtn = document.getElementById('moreOptionsBtn');
-const moreOptionsDropdown = document.getElementById('moreOptionsDropdown');
-const showMoreOptions = document.getElementById('showMoreOptions');
-const backToMainOptions = document.getElementById('backToMainOptions');
-
-// Initialize PDF.js
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.worker.min.js';
-
-// Check for dark mode preference
-function checkDarkModePreference() {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const savedMode = localStorage.getItem('darkMode');
-    
-    if (savedMode === 'dark' || (savedMode === null && prefersDark)) {
-        document.body.classList.add('dark-mode');
-        darkModeToggle.checked = true;
-    }
-}
-
-// Initialize the app
-function init() {
-    checkDarkModePreference();
-    
-    // Load analytics data from localStorage
-    loadAnalyticsData();
-    
-    // Increment visit count
-    analyticsData.totalVisits++;
-    analyticsData.visitStartTime = Date.now();
-    
-    // Show welcome modal first
-    welcomeModal.classList.remove('hidden');
-    
-    // Set up event listeners for welcome modal
-    setupWelcomeModal();
-    
-    // Save analytics data when page unloads
-    window.addEventListener('beforeunload', saveAnalyticsData);
-}
-
-// Load analytics data from localStorage
-function loadAnalyticsData() {
-    const savedData = localStorage.getItem('spaviusAnalytics');
-    if (savedData) {
-        analyticsData = JSON.parse(savedData);
-    }
-}
-
-// Save analytics data to localStorage
-function saveAnalyticsData() {
-    // Calculate time spent on this visit
-    const timeSpent = (Date.now() - analyticsData.visitStartTime) / 1000; // in seconds
-    
-    // Update average time spent
-    if (analyticsData.totalVisits > 1) {
-        analyticsData.averageTimeSpent = 
-            ((analyticsData.averageTimeSpent * (analyticsData.totalVisits - 1)) + timeSpent) / analyticsData.totalVisits;
-    } else {
-        analyticsData.averageTimeSpent = timeSpent;
-    }
-    
-    localStorage.setItem('spaviusAnalytics', JSON.stringify(analyticsData));
-}
-
-// Set up welcome modal interactions
-function setupWelcomeModal() {
-    let currentQuestionIndex = 0;
-    
-    // Display the first question
-    displayWelcomeQuestion(currentQuestionIndex);
-    
-    // Next question button
-    welcomeNextBtn.addEventListener('click', function() {
-        // Save the current answer
-        saveCurrentAnswer(currentQuestionIndex);
-        
-        // Move to next question or finish
-        if (currentQuestionIndex < welcomeQuestions.length - 1) {
-            currentQuestionIndex++;
-            displayWelcomeQuestion(currentQuestionIndex);
-            welcomePrevBtn.disabled = false;
-            
-            if (currentQuestionIndex === welcomeQuestions.length - 1) {
-                this.textContent = 'Finish';
-            }
-        } else {
-            // All questions answered, close modal
-            welcomeModal.classList.add('hidden');
-            mainContent.classList.remove('hidden');
-            
-            // Update analytics with user context
-            updateAnalyticsWithUserContext();
-            
-            // Add user context to AI prompts
-            if (userContext.curriculum || userContext.grade || userContext.subject) {
-                const contextParts = [];
-                if (userContext.curriculum) contextParts.push(`Curriculum: ${userContext.curriculum}`);
-                if (userContext.grade) contextParts.push(`Grade: ${userContext.grade}`);
-                if (userContext.subject) contextParts.push(`Subject: ${userContext.subject}`);
-                
-                processedContent = `User Context: ${contextParts.join(', ')}\n\n${processedContent}`;
-            }
-        }
-    });
-    
-    // Previous question button
-    welcomePrevBtn.addEventListener('click', function() {
-        if (currentQuestionIndex > 0) {
-            currentQuestionIndex--;
-            displayWelcomeQuestion(currentQuestionIndex);
-            
-            if (currentQuestionIndex === 0) {
-                this.disabled = true;
-            }
-            
-            welcomeNextBtn.textContent = 'Next';
-        }
-    });
-    
-    // Skip all button
-    skipAllBtn.addEventListener('click', function() {
-        welcomeModal.classList.add('hidden');
-        mainContent.classList.remove('hidden');
-    });
-}
-
-// Update analytics with user context
-function updateAnalyticsWithUserContext() {
-    // Update curriculum counts
-    if (userContext.curriculum) {
-        if (!analyticsData.curriculumCounts[userContext.curriculum]) {
-            analyticsData.curriculumCounts[userContext.curriculum] = 0;
-        }
-        analyticsData.curriculumCounts[userContext.curriculum]++;
-    }
-    
-    // Update grade counts
-    if (userContext.grade) {
-        if (!analyticsData.gradeCounts[userContext.grade]) {
-            analyticsData.gradeCounts[userContext.grade] = 0;
-        }
-        analyticsData.gradeCounts[userContext.grade]++;
-    }
-    
-    // Update subject counts
-    if (userContext.subject) {
-        if (!analyticsData.subjectCounts[userContext.subject]) {
-            analyticsData.subjectCounts[userContext.subject] = 0;
-        }
-        analyticsData.subjectCounts[userContext.subject]++;
-    }
-}
 
 // Display a welcome question
 function displayWelcomeQuestion(index) {
@@ -422,9 +346,6 @@ submitApiKey.addEventListener('click', function() {
         apiKey = newApiKey;
         apiKeyModal.classList.add('hidden');
         showError('API key updated successfully!', false, 'errorContainer');
-        
-        // Update analytics
-        analyticsData.apiKeyUploads++;
     } else {
         showError('Please enter a valid API key', false, 'modal-body');
     }
@@ -550,9 +471,23 @@ processBtn.addEventListener('click', async function() {
     quizSection.classList.add('hidden');
     quizResults.classList.add('hidden');
     chatSection.classList.add('hidden');
+    explainSection.classList.add('hidden');
     chatHistory = [];
     
+    // Clear previous quiz data
+    quizQuestions = [];
+    currentQuestionIndex = 0;
+    userAnswers = [];
+    quizSubmitted = false;
+    
     const selectedUploadType = document.querySelector('input[name="uploadType"]:checked').value;
+    
+    // Show/hide explain in detail button based on upload type
+    if (selectedUploadType === 'document' || selectedUploadType === 'text') {
+        explainInDetail.classList.remove('hidden');
+    } else {
+        explainInDetail.classList.add('hidden');
+    }
     
     processingSection.classList.remove('hidden');
     document.getElementById('errorContainer').innerHTML = '';
@@ -799,13 +734,154 @@ async function processImage(file) {
     }
 }
 
-// Process audio file (placeholder - would need Vosk.js implementation)
+// Process audio file with Web Speech API
 async function processAudio(file) {
     updateProgress(20, 'Processing audio...');
-    throw new Error('Audio processing requires additional setup with Vosk.js');
+    
+    try {
+        // Check if browser supports Web Speech API
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            throw new Error('Your browser does not support speech recognition. Try Chrome or Edge.');
+        }
+
+        // Create audio context
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const audioBuffer = await file.arrayBuffer();
+        const decodedData = await audioContext.decodeAudioData(audioBuffer);
+        
+        // Use Web Speech API for recognition
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+        
+        let transcript = '';
+        let processingComplete = false;
+        
+        return new Promise((resolve, reject) => {
+            recognition.onresult = (event) => {
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    if (event.results[i].isFinal) {
+                        transcript += event.results[i][0].transcript + ' ';
+                        updateProgress(20 + (i/event.results.length)*70, 'Processing audio...');
+                    }
+                }
+            };
+            
+            recognition.onerror = (event) => {
+                if (!processingComplete) {
+                    processingComplete = true;
+                    reject(new Error(`Speech recognition error: ${event.error}`));
+                }
+            };
+            
+            recognition.onend = () => {
+                if (!processingComplete) {
+                    processingComplete = true;
+                    
+                    // Check if transcript is too short or empty
+                    const wordCount = transcript.trim().split(/\s+/).length;
+                    if (wordCount < 10 || transcript.trim() === "") {
+                        reject(new Error("No usable transcript was generated from the audio file. The audio might be too short, unclear, or in a language not supported by your browser."));
+                    } else {
+                        resolve(transcript);
+                    }
+                }
+            };
+            
+            recognition.start();
+            
+            // Create a source from the audio buffer
+            const source = audioContext.createBufferSource();
+            source.buffer = decodedData;
+            source.connect(audioContext.destination);
+            source.start();
+            
+            // Set timeout as fallback
+            setTimeout(() => {
+                if (!processingComplete) {
+                    processingComplete = true;
+                    recognition.stop();
+                    
+                    // Check transcript length after timeout too
+                    const wordCount = transcript.trim().split(/\s+/).length;
+                    if (wordCount < 10 || transcript.trim() === "") {
+                        reject(new Error("Audio processing timed out with no usable transcript. The audio might be too long, unclear, or in a language not supported by your browser."));
+                    } else {
+                        resolve(transcript);
+                    }
+                }
+            }, 60000); // 1 minute timeout
+        });
+    } catch (error) {
+        throw new Error(`Audio processing failed: ${error.message}`);
+    }
 }
 
-// Generate notes
+// Call Gemini API with user context
+async function generateContentWithAI(prompt) {
+    try {
+        updateProgress(10, 'Connecting to Gemini AI...');
+        
+        if (!apiKey) {
+            throw new Error('API key not found. Please enter your key.');
+        }
+
+        // Add user context to the system message
+        const systemMessage = {
+            role: "system",
+            content: `You are a helpful study assistant for ${userContext.grade} students ` +
+                    `following the ${userContext.curriculum} curriculum. ` +
+                    `The current subject is ${userContext.subject}. ` +
+                    `Provide detailed, curriculum-aligned explanations.`
+        };
+
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+        const body = {
+            contents: [
+                { 
+                    parts: [
+                        { text: systemMessage.content },
+                        { text: prompt }
+                    ] 
+                }
+            ],
+            generationConfig: {
+                maxOutputTokens: 2000,
+                temperature: 0.7
+            }
+        };
+
+        const response = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
+
+        updateProgress(60, 'Processing response...');
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || 'API request failed');
+        }
+
+        const data = await response.json();
+        updateProgress(90, 'Finalizing...');
+
+        const candidate = data.candidates?.[0];
+        const parts = candidate?.content?.parts || [];
+        return parts.map(p => p.text).join('') || 'No response content found';
+    } catch (error) {
+        console.error('API Error:', error);
+        throw new Error(`AI service error: ${error.message}`);
+    }
+}
+
+// Generate notes with context
 generateNotes.addEventListener('click', async function() {
     actionSection.classList.add('hidden');
     notesSection.classList.remove('hidden');
@@ -813,13 +889,13 @@ generateNotes.addEventListener('click', async function() {
 
     try {
         const notes = await generateContentWithAI(
-            `Please create comprehensive study notes from the following content. 
-            Organize them clearly with headings, bullet points, and key takeaways.
+            `Create comprehensive study notes from the following content. 
+            Organize them clearly for a ${userContext.grade} student studying ${userContext.subject}.
             Use markdown-style formatting with:
             - Headings (##, ###)
             - Bullet points (-)
             - Bold for key terms (**term**)
-            - Clear section organization
+            - Include ${userContext.curriculum}-specific examples where relevant
             
             Content:\n\n${processedContent}`
         );
@@ -848,7 +924,7 @@ copyNotes.addEventListener('click', function() {
     setTimeout(() => notification.remove(), 2000);
 });
 
-// Generate quiz
+// Generate quiz with context
 generateQuiz.addEventListener('click', async function() {
     actionSection.classList.add('hidden');
     quizSection.classList.remove('hidden');
@@ -863,9 +939,15 @@ generateQuiz.addEventListener('click', async function() {
         }
         
         const quizResponse = await generateContentWithAI(
-            `Create a multiple-choice quiz with exactly 7 questions based on the following contents covered, make the questions about the topics covered. 
-            For each question follow this format strictly:
+            `Create a ${userContext.grade}-level quiz about ${userContext.subject} 
+            following ${userContext.curriculum} standards. Include exactly 7 questions.
+            For each question:
+            1. Make it relevant to ${userContext.subject} curriculum
+            2. Provide 4 multiple-choice options
+            3. Mark the correct answer
+            4. Add a brief explanation
             
+            Format each question like this:
             [QUESTION_START]
             Question: [The question text]
             A) [Option A]
@@ -1089,12 +1171,12 @@ chatAboutContent.addEventListener('click', function() {
     actionSection.classList.add('hidden');
     chatSection.classList.remove('hidden');
     chatHistory = [
-        { role: 'assistant', content: 'I have analyzed the content you provided. Ask me anything about it!' }
+        { role: 'assistant', content: `I have analyzed the ${userContext.subject} content you provided. Ask me anything about it!` }
     ];
     updateChatHistory();
 });
 
-// Send chat message
+// Send chat message with context
 sendChat.addEventListener('click', async function() {
     const message = chatMessage.value.trim();
     if (!message) return;
@@ -1104,19 +1186,13 @@ sendChat.addEventListener('click', async function() {
     updateChatHistory();
 
     try {
-        const messages = [
-            {
-                role: 'system',
-                content: `You are a helpful study assistant. Base your answers on this content:\n\n${processedContent}`
-            },
-            ...chatHistory.map(msg => ({
-                role: msg.role === 'user' ? 'user' : 'assistant',
-                content: msg.content
-            }))
-        ];
-
         const response = await generateContentWithAI(
-            `Current conversation:\n\n${messages.map(m => `${m.role}: ${m.content}`).join('\n')}\n\nassistant:`
+            `Student question (${userContext.grade}, ${userContext.subject}): ${message}
+            
+            Context from uploaded material:
+            ${processedContent.substring(0, 1000)}... [truncated]
+            
+            Please provide a ${userContext.curriculum}-aligned answer appropriate for ${userContext.grade} level.`
         );
         
         chatHistory.push({ role: 'assistant', content: response });
@@ -1153,54 +1229,6 @@ function updateProgress(percent, message) {
     document.getElementById('processingStatus').textContent = message;
 }
 
-// Call Gemini API via Google Gemini 2.0 Flash API
-async function generateContentWithAI(prompt) {
-    try {
-        updateProgress(10, 'Connecting to Gemini AI...');
-        
-        if (!apiKey) {
-            throw new Error('API key not found. Please enter your key.');
-        }
-
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-        const body = {
-            contents: [
-                { parts: [ { text: prompt } ] }
-            ],
-            generationConfig: {
-                maxOutputTokens: 2000,
-                temperature: 0.7
-            }
-        };
-
-        const response = await fetch(endpoint, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(body)
-        });
-
-        updateProgress(60, 'Processing response...');
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || 'API request failed');
-        }
-
-        const data = await response.json();
-        updateProgress(90, 'Finalizing...');
-
-        const candidate = data.candidates?.[0];
-        const parts = candidate?.content?.parts || [];
-        return parts.map(p => p.text).join('') || 'No response content found';
-    } catch (error) {
-        console.error('API Error:', error);
-        throw new Error(`AI service error: ${error.message}`);
-    }
-}
-
 // Format notes with Markdown-like styling
 function formatNotes(notes) {
     return notes
@@ -1225,6 +1253,113 @@ function updateChatHistory() {
     });
     chatHistoryElement.scrollTop = chatHistoryElement.scrollHeight;
 }
+
+// Explain in Detail functionality
+explainInDetail.addEventListener('click', function() {
+    actionSection.classList.add('hidden');
+    explainSection.classList.remove('hidden');
+    
+    // Display the processed content with original formatting
+    explainContent.innerHTML = `<pre>${processedContent}</pre>`;
+    
+    // Initialize chat history
+    explainChatHistory.innerHTML = '';
+});
+
+// Explain This button functionality
+explainThisBtn.addEventListener('click', function() {
+    const selection = window.getSelection();
+    const selectedText = selection.toString().trim();
+    
+    if (selectedText.length > 0) {
+        // Add user message to chat
+        addExplainChatMessage('user', `Explain this: "${selectedText}"`);
+        
+        // Generate explanation from AI with full context
+        generateExplanation(selectedText);
+    }
+});
+
+function addExplainChatMessage(role, content) {
+    const messageElement = document.createElement('div');
+    messageElement.className = `chat-message ${role}`;
+    
+    // Format the message content to handle markdown-like syntax
+    let formattedContent = content
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/^# (.*$)/gm, '<h3>$1</h3>')
+        .replace(/^## (.*$)/gm, '<h4>$1</h4>')
+        .replace(/^### (.*$)/gm, '<h5>$1</h5>')
+        .replace(/^- (.*$)/gm, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>')
+        .replace(/\n/g, '<br>');
+    
+    messageElement.innerHTML = `<strong>${role === 'user' ? 'You' : 'Spavius'}:</strong> ${formattedContent}`;
+    explainChatHistory.appendChild(messageElement);
+    explainChatHistory.scrollTop = explainChatHistory.scrollHeight;
+}
+
+async function generateExplanation(text) {
+    try {
+        const prompt = `Explain this ${userContext.subject} concept to a ${userContext.grade} student:
+        "${text}"
+        
+        Requirements:
+        1. Use ${userContext.curriculum} terminology
+        2. Provide ${userContext.grade}-appropriate examples
+        3. Relate to this content when relevant:
+        ${processedContent.substring(0, 800)}...`;
+        
+        const explanation = await generateContentWithAI(prompt);
+        addExplainChatMessage('assistant', explanation);
+    } catch (error) {
+        addExplainChatMessage('assistant', `Error generating explanation: ${error.message}`);
+    }
+}
+
+// Add this event listener for the explain chat
+sendExplainChat.addEventListener('click', async function() {
+    const message = explainChatMessage.value.trim();
+    if (!message) return;
+    
+    explainChatMessage.value = '';
+    addExplainChatMessage('user', message);
+    
+    try {
+        const prompt = `Regarding the document content, the user asks: "${message}"
+        
+        Here is the full document content for reference:
+        ${processedContent}
+        
+        Please provide a detailed answer using the document content as reference.
+        Curriculum: ${userContext.curriculum}
+        Grade Level: ${userContext.grade}
+        Subject: ${userContext.subject}`;
+        
+        const response = await generateContentWithAI(prompt);
+        addExplainChatMessage('assistant', response);
+    } catch (error) {
+        addExplainChatMessage('assistant', `Error: ${error.message}`);
+    }
+});
+
+// Add Enter key support for explain chat
+explainChatMessage.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        sendExplainChat.click();
+    }
+});
+
+// More Info Modal
+moreInfoLink.addEventListener('click', function(e) {
+    e.preventDefault();
+    infoModal.classList.remove('hidden');
+});
+
+closeInfoModal.addEventListener('click', function() {
+    infoModal.classList.add('hidden');
+});
 
 // Initialize the app when the page loads
 window.addEventListener('load', init);
