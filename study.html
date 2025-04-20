@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spavius - AI Study Assistant</title>
+    <link rel="icon" href="assets/spavius_favicon.png" type="image/png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
@@ -58,7 +59,10 @@
             </div>
 
             <header>
-                <h1>Spavius</h1>
+                <div class="logo-container">
+                    <img src="assets/spavius_light.png" alt="Spavius Logo" class="logo light-logo">
+                    <img src="assets/spavius_dark.png" alt="Spavius Logo" class="logo dark-logo">
+                </div>
                 <p>Your AI-powered study companion</p>
             </header>
 
@@ -70,7 +74,8 @@
                         <i class="fas fa-ellipsis-v"></i>
                     </button>
                     <div class="more-options-dropdown" id="moreOptionsDropdown">
-                        <button id="showMoreOptions">More Options</button>
+                        <button id="showMoreOptions">More Upload Options</button>
+                        <button id="moreInfoLink">More Information</button>
                     </div>
                 </h2>
                 
@@ -145,7 +150,7 @@
                             <input type="radio" id="uploadTypeAudio" name="uploadType" value="audio">
                             <label for="uploadTypeAudio">
                                 <i class="fas fa-microphone"></i>
-                                <div>Audio File</div>
+                                <div>Audio File (beta)</div>
                             </label>
                         </div>
                         <div class="upload-type-option">
@@ -226,6 +231,9 @@
                     <button id="chatAboutContent" class="btn">
                         <i class="fas fa-comments"></i> Chat About Content
                     </button>
+                    <button id="explainInDetail" class="btn hidden">
+                        <i class="fas fa-search-plus"></i> Explain in Detail
+                    </button>
                 </div>
             </div>
 
@@ -286,10 +294,30 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Explain in Detail Section -->
+            <div id="explainSection" class="card hidden">
+                <h2>Explain in Detail</h2>
+                <div class="explain-content-container">
+                    <div id="explainContent" class="explain-content"></div>
+                    <div class="explain-controls">
+                        <button id="explainThisBtn" class="btn btn-secondary">
+                            <i class="fas fa-question-circle"></i> Explain This
+                        </button>
+                    </div>
+                </div>
+                <div id="explainChatHistory" class="chat-history"></div>
+                <div class="chat-input-container">
+                    <input type="text" id="explainChatMessage" placeholder="Ask about the content...">
+                    <button id="sendExplainChat" class="btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- API Key Modal (hidden by default) -->
+    <!-- API Key Modal -->
     <div id="apiKeyModal" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="modal-close" id="closeApiKeyModal">&times;</button>
@@ -308,6 +336,155 @@
                 </p>
             </div>
             <button id="submitApiKey" class="btn">Continue</button>
+        </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="infoModal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 800px;">
+            <button class="modal-close" id="closeInfoModal">&times;</button>
+            <div class="modal-header">
+                <h2>About Spavius</h2>
+            </div>
+            <div class="modal-body info-modal-content">
+                <h1>Spavius - AI Study Assistant</h1>
+                <p>Welcome to Spavius, your friendly AI-powered study companion! Spavius helps you turn any study material—documents, videos, websites, images, or plain text—into organized notes, quizzes, and even a chat interface for asking questions. Give us feedback <a href="https://docs.google.com/forms/d/e/1FAIpQLSecETtbwuk275U4Ky3r5C5orIcb_0bVyJUoAaBc-BrNS8p43g/viewform?usp=dialog" target="_blank">here</a></p>
+
+                <h2>Getting Started</h2>
+                
+                <h3>First-Time Setup</h3>
+                <ol>
+                    <li><strong>Welcome Questions</strong><br>
+                    On your first visit, you'll answer 3 quick questions to personalize your experience:
+                    <ul>
+                        <li><strong>Curriculum</strong>: Select your program (IGCSE, IB, or specify your own)</li>
+                        <li><strong>Grade Level</strong>: Choose your current grade</li>
+                        <li><strong>Subject</strong>: Pick your subject of study (you can skip and set this later)</li>
+                    </ul>
+                    </li>
+                    <li><strong>Theme Selection</strong><br>
+                    The app defaults to your system preference (dark/light mode), but you can toggle this anytime using the switch in the header.</li>
+                </ol>
+
+                <h2>API Key Setup (Optional)</h2>
+                <p>For faster processing, you can add your own Google Gemini API key:</p>
+                <ol>
+                    <li>Click "Upload API key" in the header</li>
+                    <li>Get a free key from <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a></li>
+                    <li>Paste your key in the modal</li>
+                    <li>Click "Continue"</li>
+                </ol>
+                <p><em>Note: The app works without your own key, but may be slower during peak times.</em></p>
+
+                <h2>Uploading Study Materials</h2>
+                <p>Spavius supports multiple content types:</p>
+
+                <h3>Main Options</h3>
+                <ul>
+                    <li><strong>Documents</strong>: PDF, DOCX, or TXT files
+                    <ul><li>Click "Choose File" to upload</li></ul>
+                    </li>
+                    <li><strong>YouTube Videos</strong>
+                    <ul><li>Paste any YouTube video URL</li></ul>
+                    </li>
+                    <li><strong>Websites</strong>
+                    <ul><li>Enter any webpage URL</li></ul>
+                    </li>
+                </ul>
+
+                <h3>More Options (click the ⋮ menu)</h3>
+                <ul>
+                    <li><strong>Images</strong> (OCR text extraction)
+                    <ul><li>Upload JPG/PNG images of notes or textbook pages</li></ul>
+                    </li>
+                    <li><strong>Audio Files</strong> (Beta)
+                    <ul><li>Upload WAV/MP3 recordings of lectures</li></ul>
+                    </li>
+                    <li><strong>Direct Text</strong>
+                    <ul><li>Paste or type text directly</li></ul>
+                    </li>
+                </ul>
+
+                <h2>Processing Content</h2>
+                <ol>
+                    <li>Select your content type</li>
+                    <li>Upload your file or paste the URL/text</li>
+                    <li>Click "Process Content"</li>
+                    <li>Watch the progress bar as Spavius analyzes your material</li>
+                </ol>
+
+                <h3>Generate Notes</h3>
+                <ul>
+                    <li>Gets structured notes with:
+                    <ul>
+                        <li>Clear headings and subheadings</li>
+                        <li>Bullet point summaries</li>
+                        <li>Key terms in bold</li>
+                        <li>Curriculum-specific examples</li>
+                    </ul>
+                    </li>
+                </ul>
+                <p><em>Tip: Use the "Copy" button to save your notes</em></p>
+
+                <h3>Generate Quiz</h3>
+                <ul>
+                    <li>Creates a 7-question multiple-choice quiz:
+                    <ul>
+                        <li>Curriculum-aligned questions</li>
+                        <li>Immediate feedback on answers</li>
+                        <li>Detailed explanations</li>
+                        <li>Score tracking</li>
+                    </ul>
+                    </li>
+                </ul>
+                <p><em>Tip: Click "Retake Quiz" to practice again</em></p>
+
+                <h3>Chat About Content</h3>
+                <ul>
+                    <li>Ask any questions about your material</li>
+                    <li>Get instant, curriculum-specific answers</li>
+                    <li>Conversation history is saved during your session</li>
+                </ul>
+
+                <h3>Explain in Detail</h3>
+                <ul>
+                    <li>Highlight any text from your processed content</li>
+                    <li>Click "Explain This" for in-depth explanations</li>
+                    <li>Ask follow-up questions in the chat</li>
+                    <li>Only works when you upload a document or text</li>
+                </ul>
+
+                <h2>Tips</h2>
+                <ol>
+                    <li>For best OCR results, use clear images of typed text</li>
+                    <li>YouTube videos with captions will process best</li>
+                    <li>The audio feature works best with clear speech (try lecture recordings)</li>
+                    <li>Use dark mode for late-night study sessions</li>
+                    <li>Instead of uploading audio files try finding an online audio to text website and upload the text into the website instead</li>
+                </ol>
+
+                <h2>Limitations</h2>
+                <ol>
+                    <li>The website only can take in text material, that means it can't understand graphs or pictures without text uploaded</li>
+                    <li>The website pulls the transcripts (and title/description) from the youtube video uploaded, and doesn't understand the video it self.</li>
+                    <li>The audio processing only works on chrome and edge, and actually understands what's being said by outputting the audio from your file and make your browser try to under stand it</li>
+                    <li>Audio best works for files under one minute</li>
+                </ol>
+
+                <h2>Details</h2>
+                <p>Spavius is an open source free AI study website. It started as a personal project of mine in early march of 2025, being tired of so many websites charging to use AI to study when so many students have no funds to afford it. I felt that this set some students ahead than others in life, so I tried making my very own AI study website that was 100% free.</p>
+
+                <p>Spavius unfortunately probably will never be as good as those payed study website, but they it is a very big step ahead from nothing. Since Spavius was made with 0 funds for people will 0 funds it has no backend sever to do all the processing, this makes it so the website can't store data, and limits some features (like audio processing). Since Spavius is made with 0 funds I had to find an Large Language Model AI that has a free API, after a LONG while of consideration and testing Gemini felt like the way to go. Gemini 2.0 Flash has insane free response speeds for being completely free while still being accurate, and had easy intergraition into the website to keep it client side.</p>
+
+                <p>The website being client side set a lot of set backs for the creation of the website, countless hours were spent at my laptop trying to make everything work client side, but eventually I figured it out. If the website ever feels slow in processing or something like that it's not the website it's YOUR device so keep that in mind. Also if you want me to add anything and want a certian way of getting to me send me a friend request on discord, my username is <b>its_idhem</b></p>
+
+                <h1>Credits</h1>
+                <p><strong>Head Delevoper</strong> Mehdi Rahimli</p>
+                <p><strong>Website Designer</strong> Mehdi Rahimli</p>
+                <p><strong>Absolute website beast</strong> Mehdi Rahimli</p>
+                <p><strong>Gave Youtube API and a lot of critique</strong> Seonghyun Je</p>
+                <p><strong>Made the Very cool logo</strong> Luke Angeles</p>
+            </div>
         </div>
     </div>
 
