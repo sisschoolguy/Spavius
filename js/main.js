@@ -13,6 +13,15 @@ let userContext = {
     subject: ''
 };
 
+// App settings
+let appSettings = {
+    theme: 'default',
+    quizQuestions: 7,
+    difficulty: 'medium',
+    aiContext: '',
+    notesFormat: null
+};
+
 // DOM elements
 const welcomeModal = document.getElementById('welcomeModal');
 const welcomeNextBtn = document.getElementById('welcomeNextBtn');
@@ -38,6 +47,7 @@ const explainInDetail = document.getElementById('explainInDetail');
 const notesSection = document.getElementById('notesSection');
 const notesOutput = document.getElementById('notesOutput');
 const copyNotes = document.getElementById('copyNotes');
+const exportPdf = document.getElementById('exportPdf');
 const quizSection = document.getElementById('quizSection');
 const questionLoadingBar = document.getElementById('questionLoadingBar');
 const questionLoadingProgress = document.getElementById('questionLoadingProgress');
@@ -84,6 +94,18 @@ const changeApiKey = document.getElementById('changeApiKey');
 const moreInfoLink = document.getElementById('moreInfoLink');
 const infoModal = document.getElementById('infoModal');
 const closeInfoModal = document.getElementById('closeInfoModal');
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsModal = document.getElementById('settingsModal');
+const closeSettingsModal = document.getElementById('closeSettingsModal');
+const themeSelect = document.getElementById('themeSelect');
+const questionCount = document.getElementById('questionCount');
+const questionCountValue = document.getElementById('questionCountValue');
+const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+const aiContext = document.getElementById('aiContext');
+const submitContext = document.getElementById('submitContext');
+const notesFormat = document.getElementById('notesFormat');
+const submitNotesFormat = document.getElementById('submitNotesFormat');
+const generateSummary = document.getElementById('generateSummary');
 
 // Initialize PDF.js
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.worker.min.js';
@@ -108,6 +130,170 @@ function init() {
     
     // Set up event listeners for welcome modal
     setupWelcomeModal();
+    
+    // Initialize settings
+    setupSettings();
+}
+
+// Set up settings
+function setupSettings() {
+    // Theme handling
+    themeSelect.addEventListener('change', function(e) {
+        const theme = e.target.value;
+        document.body.classList.remove('aesthetic-theme', 'hc-theme');
+        
+        if (theme === 'aesthetic') {
+            document.body.classList.add('aesthetic-theme');
+            // Update logo visibility
+            document.querySelectorAll('.logo').forEach(logo => logo.style.display = 'none');
+            document.querySelector('.aesthetic-logo').style.display = 'block';
+            
+            // Special handling for dark mode in aesthetic theme
+            if (document.body.classList.contains('dark-mode')) {
+                document.querySelector('.aesthetic-logo').style.display = 'none';
+                document.querySelector('.hc-logo').style.display = 'block';
+            }
+        } else {
+            // Default theme logic
+            document.querySelectorAll('.logo').forEach(logo => logo.style.display = 'none');
+            if (document.body.classList.contains('dark-mode')) {
+                document.querySelector('.dark-logo').style.display = 'block';
+            } else {
+                document.querySelector('.light-logo').style.display = 'block';
+            }
+        }
+        
+        appSettings.theme = theme;
+    });
+
+    // Quiz settings handlers
+    questionCount.addEventListener('input', function(e) {
+        appSettings.quizQuestions = e.target.value;
+        questionCountValue.textContent = e.target.value;
+    });
+
+    difficultyBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            appSettings.difficulty = this.dataset.difficulty;
+        });
+    });
+
+    // AI Context handling
+    submitContext.addEventListener('click', function() {
+        appSettings.aiContext = aiContext.value.trim();
+        showError('Context updated successfully!', false, 'errorContainer');
+    });
+
+    // Notes Format handling
+    submitNotesFormat.addEventListener('click', function() {
+        appSettings.notesFormat = notesFormat.value.trim();
+        showError('Notes format updated successfully!', false, 'errorContainer');
+    });
+
+    // Settings modal logic
+    settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+    closeSettingsModal.addEventListener('click', () => settingsModal.classList.add('hidden'));
+
+    // Updated PDF export functionality
+    exportPdf.addEventListener('click', async function() {
+        try {
+            // Store original content
+            const originalHtml = notesOutput.innerHTML;
+            
+            // Create clone with PDF-specific styling
+            const notesClone = notesOutput.cloneNode(true);
+            notesClone.classList.add('pdf-export-clone');
+            document.body.appendChild(notesClone);
+
+            // Force reset styles for PDF
+            notesClone.style.color = '#000000';
+            notesClone.style.backgroundColor = '#ffffff';
+
+            // Show loading message
+            notesOutput.innerHTML = '<div class="processing-pdf">Preparing PDF export...</div>';
+
+            // Configure PDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            // Use html2canvas with proper options
+            const canvas = await html2canvas(notesClone, {
+                scale: 2, // Better quality
+                logging: true,
+                useCORS: true,
+                allowTaint: true,
+                onclone: (clonedDoc) => {
+                    // Ensure all elements are visible
+                    clonedDoc.querySelectorAll('*').forEach(el => {
+                        el.style.visibility = 'visible';
+                        el.style.opacity = '1';
+                    });
+                }
+            });
+
+            // Calculate image dimensions
+            const imgWidth = 190; // A4 width in mm (210 - 20mm margins)
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            // Check if content exceeds one page
+            const pageHeight = doc.internal.pageSize.getHeight() - 20; // 20mm margin
+            let heightLeft = imgHeight;
+            let position = 10; // Top margin (10mm)
+
+            // Add first page
+            doc.addImage(canvas, 'PNG', 10, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            // Add new pages if content is too long
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                doc.addPage();
+                doc.addImage(canvas, 'PNG', 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            // Cleanup
+            document.body.removeChild(notesClone);
+            notesOutput.innerHTML = originalHtml;
+
+            // Save PDF
+            doc.save('spavius-notes.pdf');
+
+        } catch (error) {
+            console.error('PDF Export Error:', error);
+            notesOutput.innerHTML = originalHtml;
+            showError(`PDF Export Failed: ${error.message}`);
+        }
+    });
+
+    // Generate summary button
+    generateSummary.addEventListener('click', async function() {
+        actionSection.classList.add('hidden');
+        notesSection.classList.remove('hidden');
+        notesOutput.textContent = 'Generating summary...';
+
+        try {
+            const summary = await generateContentWithAI(
+                `Create a concise summary from the following content. 
+                Focus on key concepts appropriate for a ${userContext.grade} student studying ${userContext.subject}.
+                Use bullet points and highlight main ideas.
+                
+                Content:\n\n${processedContent}`
+            );
+            notesOutput.innerHTML = formatNotes(summary);
+        } catch (error) {
+            notesOutput.innerHTML = `<div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i>
+                Error generating summary: ${error.message}
+            </div>`;
+        }
+    });
 }
 
 // Set up welcome modal interactions
@@ -323,9 +509,25 @@ darkModeToggle.addEventListener('change', function() {
     if (this.checked) {
         document.body.classList.add('dark-mode');
         localStorage.setItem('darkMode', 'dark');
+        // Update logo visibility
+        if (appSettings.theme === 'default') {
+            document.querySelectorAll('.logo').forEach(logo => logo.style.display = 'none');
+            document.querySelector('.dark-logo').style.display = 'block';
+        } else if (appSettings.theme === 'aesthetic') {
+            document.querySelectorAll('.logo').forEach(logo => logo.style.display = 'none');
+            document.querySelector('.hc-logo').style.display = 'block';
+        }
     } else {
         document.body.classList.remove('dark-mode');
         localStorage.setItem('darkMode', 'light');
+        // Update logo visibility
+        if (appSettings.theme === 'default') {
+            document.querySelectorAll('.logo').forEach(logo => logo.style.display = 'none');
+            document.querySelector('.light-logo').style.display = 'block';
+        } else if (appSettings.theme === 'aesthetic') {
+            document.querySelectorAll('.logo').forEach(logo => logo.style.display = 'none');
+            document.querySelector('.aesthetic-logo').style.display = 'block';
+        }
     }
 });
 
@@ -592,7 +794,7 @@ async function processWebsite(url) {
         if (!data.contents) {
             throw new Error('No content received from website');
         }
-        
+
         const parser = new DOMParser();
         const doc = parser.parseFromString(data.contents, 'text/html');
         const elementsToRemove = doc.querySelectorAll('script, style, nav, footer, iframe, img');
@@ -834,7 +1036,8 @@ async function generateContentWithAI(prompt) {
             content: `You are a helpful study assistant for ${userContext.grade} students ` +
                     `following the ${userContext.curriculum} curriculum. ` +
                     `The current subject is ${userContext.subject}. ` +
-                    `Provide detailed, curriculum-aligned explanations.`
+                    `Provide detailed, curriculum-aligned explanations.` +
+                    (appSettings.aiContext ? ` Additional context: ${appSettings.aiContext}` : '')
         };
 
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
@@ -888,8 +1091,7 @@ generateNotes.addEventListener('click', async function() {
     notesOutput.textContent = 'Generating notes...';
 
     try {
-        const notes = await generateContentWithAI(
-            `Create comprehensive study notes from the following content. 
+        let prompt = `Create comprehensive study notes from the following content. 
             Organize them clearly for a ${userContext.grade} student studying ${userContext.subject}.
             Use markdown-style formatting with:
             - Headings (##, ###)
@@ -897,8 +1099,13 @@ generateNotes.addEventListener('click', async function() {
             - Bold for key terms (**term**)
             - Include ${userContext.curriculum}-specific examples where relevant
             
-            Content:\n\n${processedContent}`
-        );
+            Content:\n\n${processedContent}`;
+        
+        if (appSettings.notesFormat) {
+            prompt = appSettings.notesFormat.replace('{{content}}', processedContent);
+        }
+
+        const notes = await generateContentWithAI(prompt);
         notesOutput.innerHTML = formatNotes(notes);
     } catch (error) {
         notesOutput.innerHTML = `<div class="alert alert-danger">
@@ -931,7 +1138,7 @@ generateQuiz.addEventListener('click', async function() {
     questionLoadingBar.classList.remove('hidden');
     
     try {
-        const totalQuestions = 7;
+        const totalQuestions = appSettings.quizQuestions;
         for (let i = 0; i <= totalQuestions; i++) {
             const progress = Math.min((i / totalQuestions) * 100, 100);
             questionLoadingProgress.style.width = `${progress}%`;
@@ -940,7 +1147,8 @@ generateQuiz.addEventListener('click', async function() {
         
         const quizResponse = await generateContentWithAI(
             `Create a ${userContext.grade}-level quiz about ${userContext.subject} 
-            following ${userContext.curriculum} standards. Include exactly 7 questions.
+            following ${userContext.curriculum} standards. Include exactly ${totalQuestions} questions.
+            Difficulty level: ${appSettings.difficulty}.
             For each question:
             1. Make it relevant to ${userContext.subject} curriculum
             2. Provide 4 multiple-choice options
@@ -1014,7 +1222,7 @@ function parseQuizQuestions(quizText) {
         }
     }
     
-    return questions.slice(0, 7);
+    return questions.slice(0, appSettings.quizQuestions);
 }
 
 // Display a question
@@ -1133,7 +1341,7 @@ function showQuizResults() {
                         ${option.letter === question.correctAnswer ? '✓' : ''}
                         ${option.letter === userAnswer && !isCorrect ? '✗' : ''}
                     </label>
-                </div>
+                    </div>
             `;
         });
         
@@ -1234,9 +1442,9 @@ function formatNotes(notes) {
     return notes
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/^# (.*$)/gm, '<h3>$1</h3>')
-        .replace(/^## (.*$)/gm, '<h4>$1</h4>')
-        .replace(/^### (.*$)/gm, '<h5>$1</h5>')
+        .replace(/^# (.*$)/gm, '<h2>$1</h2>')
+        .replace(/^## (.*$)/gm, '<h3>$1</h3>')
+        .replace(/^### (.*$)/gm, '<h4>$1</h4>')
         .replace(/^- (.*$)/gm, '<li>$1</li>')
         .replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>')
         .replace(/\n/g, '<br>');
@@ -1288,9 +1496,9 @@ function addExplainChatMessage(role, content) {
     let formattedContent = content
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/^# (.*$)/gm, '<h3>$1</h3>')
-        .replace(/^## (.*$)/gm, '<h4>$1</h4>')
-        .replace(/^### (.*$)/gm, '<h5>$1</h5>')
+        .replace(/^# (.*$)/gm, '<h2>$1</h2>')
+        .replace(/^## (.*$)/gm, '<h3>$1</h3>')
+        .replace(/^### (.*$)/gm, '<h4>$1</h4>')
         .replace(/^- (.*$)/gm, '<li>$1</li>')
         .replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>')
         .replace(/\n/g, '<br>');
