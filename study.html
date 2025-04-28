@@ -11,6 +11,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.worker.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.0/mammoth.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <!-- PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+	<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
 <body class="dark-mode">
     <!-- Welcome Modal -->
@@ -41,6 +44,60 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 500px;">
+            <button class="modal-close" id="closeSettingsModal">&times;</button>
+            <div class="modal-header">
+                <h2>Settings</h2>
+            </div>
+            <div class="modal-body">
+                <!-- Theme Settings -->
+                <div class="settings-group">
+                    <h3>Themes</h3>
+                    <select id="themeSelect" class="settings-select">
+                        <option value="default">Default Theme</option>
+                        <option value="aesthetic">Aesthetic Theme</option>
+                    </select>
+                </div>
+
+                <!-- Quiz Settings -->
+                <div class="settings-group">
+                    <h3>Quiz Settings</h3>
+                    <div class="input-group">
+                        <label>Number of Questions (1-15)</label>
+                        <input type="range" id="questionCount" min="1" max="15" value="7">
+                        <span id="questionCountValue">7</span>
+                    </div>
+                    <div class="input-group">
+                        <label>Difficulty</label>
+                        <div class="difficulty-buttons">
+                            <button class="difficulty-btn active" data-difficulty="medium">Medium</button>
+                            <button class="difficulty-btn" data-difficulty="easy">Easy</button>
+                            <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Context -->
+                <div class="settings-group">
+                    <h3>AI Context</h3>
+                    <textarea id="aiContext" maxlength="120" 
+                        placeholder="Additional context for AI..."></textarea>
+                    <button id="submitContext" class="btn btn-secondary mt-2">Submit Context</button>
+                </div>
+
+                <!-- Notes Format -->
+                <div class="settings-group">
+                    <h3>Notes Format</h3>
+                    <textarea id="notesFormat" 
+                        placeholder="Enter custom notes format (use {{content}} as placeholder)..."></textarea>
+                    <button id="submitNotesFormat" class="btn btn-secondary mt-2">Submit Format</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main App Content -->
     <div class="container">
         <div id="mainContent" class="hidden">
@@ -62,7 +119,12 @@
                 <div class="logo-container">
                     <img src="assets/spavius_light.png" alt="Spavius Logo" class="logo light-logo">
                     <img src="assets/spavius_dark.png" alt="Spavius Logo" class="logo dark-logo">
+                    <img src="assets/spavius_pastel.png" alt="Spavius Logo" class="logo aesthetic-logo">
+                    <img src="assets/spavius_highcontrast.png" alt="Spavius Logo" class="logo hc-logo">
                 </div>
+                <button id="settingsBtn" class="settings-btn">
+                    <i class="fas fa-cog"></i>
+                </button>
                 <p>Your AI-powered study companion</p>
             </header>
 
@@ -231,6 +293,9 @@
                     <button id="chatAboutContent" class="btn">
                         <i class="fas fa-comments"></i> Chat About Content
                     </button>
+                    <button id="generateSummary" class="btn">
+                        <i class="fas fa-file-alt"></i> Generate Summary
+                    </button>
                     <button id="explainInDetail" class="btn hidden">
                         <i class="fas fa-search-plus"></i> Explain in Detail
                     </button>
@@ -241,9 +306,14 @@
             <div id="notesSection" class="card hidden">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h2>Generated Notes</h2>
-                    <button id="copyNotes" class="btn btn-secondary" style="width: auto; padding: 8px 12px;">
-                        <i class="fas fa-copy"></i> Copy
-                    </button>
+                    <div>
+                        <button id="copyNotes" class="btn btn-secondary" style="width: auto; padding: 8px 12px;">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                        <button id="exportPdf" class="btn btn-secondary" style="width: auto; padding: 8px 12px;">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                    </div>
                 </div>
                 <div id="notesOutput" class="output-content mt-3"></div>
             </div>
@@ -445,6 +515,13 @@
                     <li>Get instant, curriculum-specific answers</li>
                     <li>Conversation history is saved during your session</li>
                 </ul>
+				
+				<h3>Quick Summary</h3>
+                <ul>
+                    <li> Makes a short summary based on the material uploaded </li>
+					<li> Works similiarly to the notes feature but is shorter </li>
+					<li> Can't change the summary format in the settings </li>
+                </ul>
 
                 <h3>Explain in Detail</h3>
                 <ul>
@@ -470,20 +547,42 @@
                     <li>The audio processing only works on chrome and edge, and actually understands what's being said by outputting the audio from your file and make your browser try to under stand it</li>
                     <li>Audio best works for files under one minute</li>
                 </ol>
+				
+				<h2>Settings Overview</h2>
+                <p>The settings panel (gear icon) lets you customize your experience:</p>
 
+                <h3>Themes</h3>
+                <ul>
+                    <li><strong>Default Theme</strong>: Clean blue/dark interface</li>
+                    <li><strong>Aesthetic Theme</strong>: Soft pastel colors for light mode, high contrast for dark mode</li>
+                </ul>
+
+                <h3>Quiz Settings</h3>
+                <ul>
+                    <li><strong>Question Count</strong>: Choose between 1-15 questions</li>
+                    <li><strong>Difficulty</strong>: Easy, Medium, or Hard levels</li>
+                </ul>
+
+                <h3>AI Context</h3>
+                <ul>
+                    <li>Add extra context to help the AI understand your specific needs</li>
+                    <li>Example: "Focus on chemical equations for IGCSE Chemistry"</li>
+                </ul>
+
+                <h3>Notes Format</h3>
+                <ul>
+                    <li>Customize how your notes are structured</li>
+                    <li>Use {{content}} as placeholder for where the content should go</li>
+                </ul>
                 <h2>Details</h2>
                 <p>Spavius is an open source free AI study website. It started as a personal project of mine in early march of 2025, being tired of so many websites charging to use AI to study when so many students have no funds to afford it. I felt that this set some students ahead than others in life, so I tried making my very own AI study website that was 100% free.</p>
 
                 <p>Spavius unfortunately probably will never be as good as those payed study website, but they it is a very big step ahead from nothing. Since Spavius was made with 0 funds for people will 0 funds it has no backend sever to do all the processing, this makes it so the website can't store data, and limits some features (like audio processing). Since Spavius is made with 0 funds I had to find an Large Language Model AI that has a free API, after a LONG while of consideration and testing Gemini felt like the way to go. Gemini 2.0 Flash has insane free response speeds for being completely free while still being accurate, and had easy intergraition into the website to keep it client side.</p>
 
-                <p>The website being client side set a lot of set backs for the creation of the website, countless hours were spent at my laptop trying to make everything work client side, but eventually I figured it out. If the website ever feels slow in processing or something like that it's not the website it's YOUR device so keep that in mind. Also if you want me to add anything and want a certian way of getting to me send me a friend request on discord, my username is <b>its_idhem</b></p>
+                <p>The website being client side set a lot of set backs for the creation of the website, countless hours were spent at my laptop trying to make everything work client side, but eventually I figured it out. If the website ever feels slow in processing or something like that it's not the website it's YOUR device so keep that in mind. Also if you want me to add anything and want a certian way of getting to me send me a friend request on discord, my username is <b>its_idhem</b>. I plan to continue improving this website even after the school year ends, so expect by next school year for this to be the best AI study website ever. 	</p>
 
-                <h1>Credits</h1>
-                <p><strong>Head Delevoper</strong> Mehdi Rahimli</p>
-                <p><strong>Website Designer</strong> Mehdi Rahimli</p>
-                <p><strong>Absolute website beast</strong> Mehdi Rahimli</p>
-                <p><strong>Gave Youtube API and a lot of critique</strong> Seonghyun Je</p>
-                <p><strong>Made the Very cool logo</strong> Luke Angeles</p>
+
+                <p>All processing happens in your browser using Google's Gemini AI API.</p>
             </div>
         </div>
     </div>
