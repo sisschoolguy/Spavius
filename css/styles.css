@@ -21,6 +21,19 @@
     --dm-secondary: #6a1b9a;
     --dm-border: #333;
     --dm-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+
+    /* New theme variables */
+    /* Aesthetic Light Theme */
+    --aesthetic-light-bg: #FFF3E0;
+    --aesthetic-light-primary: #FFB3BA;
+    --aesthetic-light-secondary: #FFDAC1;
+    --aesthetic-light-text: #4A4A4A;
+
+    /* High Contrast Dark Theme */
+    --hc-dark-bg: #000000;
+    --hc-dark-primary: #00F3FF;
+    --hc-dark-secondary: #FFEB3B;
+    --hc-dark-text: #FFEB3B; /* Changed from white to yellow */
 }
 
 * {
@@ -40,6 +53,28 @@ body {
 body.dark-mode {
     background-color: var(--dm-bg);
     color: var(--dm-text);
+}
+
+/* New theme classes */
+body.aesthetic-theme {
+    --primary: var(--aesthetic-light-primary);
+    --primary-dark: #FF9AA2;
+    --secondary: var(--aesthetic-light-secondary);
+    --light: var(--aesthetic-light-bg);
+    --dark: var(--aesthetic-light-text);
+    
+    background-color: var(--aesthetic-light-bg);
+    color: var(--aesthetic-light-text);
+}
+
+body.aesthetic-theme.dark-mode {
+    --dm-bg: var(--hc-dark-bg);
+    --dm-primary: var(--hc-dark-primary);
+    --dm-secondary: var(--hc-dark-secondary);
+    --dm-text: var(--hc-dark-text);
+    
+    background-color: var(--hc-dark-bg);
+    color: var(--hc-dark-text);
 }
 
 .container {
@@ -63,6 +98,7 @@ body.dark-mode {
     display: flex;
     justify-content: center;
     margin-bottom: 0.5rem;
+    position: relative;
 }
 
 .logo {
@@ -80,6 +116,43 @@ body.dark-mode .logo.light-logo {
 
 body.dark-mode .logo.dark-logo {
     display: block;
+}
+
+/* Updated logo visibility rules for aesthetic themes */
+body.aesthetic-theme .logo.light-logo,
+body.aesthetic-theme .logo.dark-logo {
+    display: none;
+}
+
+body.aesthetic-theme .logo.aesthetic-logo {
+    display: block;
+}
+
+body.aesthetic-theme.dark-mode .logo.aesthetic-logo,
+body.aesthetic-theme.dark-mode .logo.light-logo,
+body.aesthetic-theme.dark-mode .logo.dark-logo {
+    display: none;
+}
+
+body.aesthetic-theme.dark-mode .logo.hc-logo {
+    display: block;
+}
+
+/* Settings button */
+.settings-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 10;
+}
+
+body.dark-mode .settings-btn {
+    color: var(--dm-primary);
 }
 
 /* Header controls */
@@ -228,6 +301,9 @@ body.dark-mode .modal-header h2 {
 
 .modal-body {
     margin-bottom: 1.5rem;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 10px;
 }
 
 .input-group {
@@ -358,6 +434,7 @@ header {
     background: white;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
+    position: relative;
 }
 
 body.dark-mode header {
@@ -518,6 +595,23 @@ body.dark-mode .upload-option:hover {
     font-weight: 500;
     margin-bottom: 0.5rem;
     cursor: pointer;
+}
+
+/* Added upload icon color rules */
+.upload-option label i {
+    color: var(--primary);
+}
+
+body.aesthetic-theme .upload-option label i {
+    color: var(--aesthetic-light-primary);
+}
+
+body.dark-mode .upload-option label i {
+    color: var(--dm-primary);
+}
+
+body.aesthetic-theme.dark-mode .upload-option label i {
+    color: var(--hc-dark-primary);
 }
 
 body.dark-mode .upload-option label i {
@@ -776,6 +870,10 @@ body.dark-mode .chat-history {
     line-height: 1.4;
     position: relative;
     word-wrap: break-word;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
 }
 
 .chat-message.user {
@@ -1118,6 +1216,143 @@ body.dark-mode .skip-question button {
     margin-top: 1rem;
 }
 
+/* Settings Modal Styles */
+.settings-group {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border: 1px solid var(--dm-border);
+    border-radius: var(--border-radius);
+}
+
+.settings-select {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    border: 1px solid #ddd;
+    background-color: white;
+    color: var(--dark);
+}
+
+body.dark-mode .settings-select {
+    background-color: #333;
+    color: var(--dm-text);
+    border-color: var(--dm-border);
+}
+
+.difficulty-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.difficulty-btn {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--primary);
+    border-radius: var(--border-radius);
+    background: none;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.difficulty-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+body.dark-mode .difficulty-btn {
+    background-color: var(--dm-card);
+    color: var(--dm-text);
+    border-color: var(--dm-primary);
+}
+
+body.dark-mode .difficulty-btn.active {
+    background: var(--dm-primary);
+}
+
+/* PDF Export Styles */
+.output-content {
+    line-height: 1.6;
+    font-size: 16px;
+}
+
+.output-content h3, 
+.output-content h4, 
+.output-content h5 {
+    margin: 1em 0 0.5em 0;
+    page-break-after: avoid;
+}
+
+.output-content ul, 
+.output-content ol {
+    margin: 0.5em 0;
+    padding-left: 2em;
+    page-break-inside: avoid;
+}
+
+.output-content li {
+    margin-bottom: 0.3em;
+    page-break-inside: avoid;
+}
+
+.output-content p {
+    margin: 0.5em 0;
+    page-break-inside: avoid;
+}
+
+/* PDF Export Clone Styling - Updated */
+.pdf-export-clone {
+    position: absolute !important;
+    left: -9999px !important;
+    top: 0 !important;
+    width: 794px !important; /* A4 width in pixels */
+    min-height: 1123px !important; /* A4 height */
+    background: white !important;
+    color: black !important;
+    padding: 40px !important;
+    box-sizing: border-box !important;
+    z-index: 9999 !important;
+}
+
+.pdf-export-clone * {
+    color: black !important;
+    background: white !important;
+    box-shadow: none !important;
+    border-color: #000000 !important;
+}
+
+.pdf-export-clone .alert,
+.pdf-export-clone .quiz-option,
+.pdf-export-clone .chat-message {
+    border: 1px solid #ddd !important;
+}
+
+.pdf-export-clone h2,
+.pdf-export-clone h3 {
+    color: #000000 !important;
+    border-bottom: 2px solid #000000 !important;
+}
+
+.pdf-export-clone h3 {
+    font-size: 18px !important;
+    margin: 15px 0 !important;
+}
+
+.pdf-export-clone ul, 
+.pdf-export-clone ol {
+    margin-left: 30px !important;
+}
+
+.pdf-export-clone li {
+    margin-bottom: 8px !important;
+    font-size: 14px !important;
+}
+
+.processing-pdf {
+    padding: 20px;
+    text-align: center;
+    color: var(--primary);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {
@@ -1146,6 +1381,14 @@ body.dark-mode .skip-question button {
     .welcome-content {
         width: 95%;
         padding: 1.5rem;
+    }
+
+    .difficulty-buttons {
+        flex-direction: column;
+    }
+
+    #mindMapContainer {
+        height: 300px;
     }
 }
 
